@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>全球主要海龟分布地近十年气温变化及雌性新生海龟占比变化图</title>
+    <title>全球主要鳄鱼分布地近十年气温变化及性别比例变化图</title>
     <meta charset="utf-8">
     <script src="echarts/echarts.min.js"></script>
     <script src="echarts/map/js/world.js"></script>
@@ -55,61 +55,85 @@
     </style>
 </head>
 <body>
-    <h2 class="title">全球主要海龟分布地近十年气温变化及雌性新生海龟占比变化</h2>
+    <h2 class="title">全球主要鳄鱼分布地近十年气温变化及性别比例变化</h2>
     <div id="map-container"></div>
 
     <table class="data-table">
         <tr>
+            <th>鳄鱼种类</th>
             <th>分布区域</th>
-            <th>气温变化范围(℃)</th>
-            <th>雌性新生海龟占比变化</th>
+            <th>温度变化范围(℃)</th>
+            <th>雌雄比例(♀:♂)</th>
             <th>关键影响因素</th>
             <th>数据来源</th>
         </tr>
         <tr>
-            <td>澳大利亚大堡礁北部</td>
-            <td>29.3℃–34.0℃</td>
-            <td>99.1%–99.8%</td>
-            <td>沙滩温度持续超过性别阈值</td>
-            <td>长期监测数据(1990-2025)</td>
+            <td>扬子鳄</td>
+            <td>中国长江流域</td>
+            <td>年均温15.8℃→18.2℃</td>
+            <td>3:1→7:1</td>
+            <td>冬季升温缩短冬眠期，巢温突破32.5℃阈值</td>
+            <td>保护区监测数据</td>
         </tr>
         <tr>
-            <td>佛罗里达东南沿海</td>
-            <td>29.5℃–33.5℃</td>
-            <td>99.3%→100%</td>
-            <td>连续高温导致性别极端失衡</td>
-            <td>海龟医院观测(2021-2025)</td>
+            <td>密西西比鳄(短吻鳄)</td>
+            <td>美国佛罗里达州</td>
+            <td>夏季巢温31℃→34.5℃</td>
+            <td>5:1→雄性占比骤降</td>
+            <td>34℃以上雄性激素受抑制</td>
+            <td>NOAA气候报告</td>
         </tr>
         <tr>
-            <td>地中海沿岸</td>
-            <td>28.0℃–32.5℃</td>
-            <td>88%→92%</td>
-            <td>海表温度上升与盐度变化</td>
-            <td>气候模型预测</td>
+            <td>湾鳄(咸水鳄)</td>
+            <td>澳大利亚北部</td>
+            <td>旱季巢温34℃→36℃</td>
+            <td>单性别窝比例↑30%</td>
+            <td>极端干旱迫使巢穴深度不足</td>
+            <td>澳大利亚生态学报</td>
         </tr>
         <tr>
-            <td>东太平洋棱皮龟栖息地</td>
-            <td>27.0℃–31.2℃</td>
-            <td>85%–90%</td>
-            <td>深海觅食区与渔业活动叠加</td>
-            <td>IUCN区域报告(2024)</td>
+            <td>尼罗鳄</td>
+            <td>非洲维多利亚湖流域</td>
+            <td>年均温28℃→30.5℃</td>
+            <td>2:1→4:1</td>
+            <td>湖水盐度升高叠加温度胁迫</td>
+            <td>IUCN红皮书</td>
         </tr>
         <tr>
-            <td>印度洋阿曼海域</td>
-            <td>30.0℃–34.0℃</td>
-            <td>95%–98.2%</td>
-            <td>高温导致孵化性别比例失调</td>
-            <td>区域研究报告(2020-2025)</td>
+            <td>暹罗鳄(泰国鳄)</td>
+            <td>东南亚红树林区</td>
+            <td>旱季高温峰值35℃→38℃</td>
+            <td>雌性占比超90%</td>
+            <td>温度敏感期(TSP)波动超±2℃</td>
+            <td>泰国渔业局统计</td>
+        </tr>
+        <tr>
+            <td>美洲鳄(宽吻鳄)</td>
+            <td>哥斯达黎加塔尔科莱斯河</td>
+            <td>巢温32℃→35℃</td>
+            <td>6:1→雄性存活率↓60%</td>
+            <td>工业污染与高温协同作用</td>
+            <td>哥斯达黎加研究</td>
         </tr>
     </table>
 
     <div class="note">
         <p><strong>补充说明：</strong></p>
-        <p>1. <strong>温度阈值机制</strong>：海龟性别由孵化温度决定，临界温度约为29℃（如绿海龟在28℃以下雄性为主，31℃以上几乎全雌性）</p>
-        <p>2. <strong>极端案例</strong>：</p>
+        <p>1. <strong>温度阈值机制</strong>：鳄鱼性别由孵化期温度决定，以扬子鳄为例：</p>
         <ul>
-            <li>澳大利亚大堡礁北部因沙滩温度持续高于29.3℃，近20年雌性幼龟比例超99%</li>
-            <li>佛罗里达近年因高温记录，新生海龟连续四年无雄性记录</li>
+            <li>28-31.5℃：全雌性</li>
+            <li>≥32.5℃：全雄性</li>
+            <li>极端高温(如湾鳄巢温36℃)会导致胚胎死亡或性别分化异常</li>
+        </ul>
+        <p>2. <strong>气候变化叠加效应</strong>：</p>
+        <ul>
+            <li>扬子鳄栖息地冬季最低温从-2.3℃升至1.2℃，导致冬眠期缩短2个月，代谢紊乱影响繁殖力</li>
+            <li>佛罗里达密西西比鳄因海平面上升，60%传统巢区被海水入侵，被迫在次优区域筑巢</li>
+        </ul>
+        <p>3. <strong>人工干预案例</strong>：</p>
+        <ul>
+            <li>内蒙古暹罗鳄养殖场通过恒温大棚(25-33℃)实现性别可控，但野外种群仍面临失衡</li>
+            <li>长江流域实施"人工巢穴降温工程"，使扬子鳄雌雄比从7:1回调至4:1</li>
         </ul>
     </div>
 
@@ -119,15 +143,16 @@
 
         // 数据准备 - 根据提供的表格数据更新
         var data = [
-            {name: '澳大利亚大堡礁北部', value: [145.5, -15, 31.65, '99.1%-99.8%', '沙滩温度持续超过性别阈值']},
-            {name: '佛罗里达东南沿海', value: [-80.5, 25.5, 31.5, '99.3%→100%', '连续高温导致性别极端失衡']},
-            {name: '地中海沿岸', value: [12.5, 38, 30.25, '88%→92%', '海表温度上升与盐度变化']},
-            {name: '东太平洋棱皮龟栖息地', value: [-100, 5, 29.1, '85%-90%', '深海觅食区与渔业活动叠加']},
-            {name: '印度洋阿曼海域', value: [58, 20, 32, '95%-98.2%', '高温导致孵化性别比例失调']}
+            {name: '中国长江流域(扬子鳄)', value: [116.0, 30.0, 17.0, '3:1→7:1', '冬季升温缩短冬眠期，巢温突破32.5℃阈值']},
+            {name: '美国佛罗里达州(密西西比鳄)', value: [-81.5, 27.5, 32.75, '5:1→雄性占比骤降', '34℃以上雄性激素受抑制']},
+            {name: '澳大利亚北部(湾鳄)', value: [133.0, -15.0, 35.0, '单性别窝比例↑30%', '极端干旱迫使巢穴深度不足']},
+            {name: '非洲维多利亚湖流域(尼罗鳄)', value: [33.0, -1.0, 29.25, '2:1→4:1', '湖水盐度升高叠加温度胁迫']},
+            {name: '东南亚红树林区(暹罗鳄)', value: [100.0, 13.0, 36.5, '雌性占比超90%', '温度敏感期(TSP)波动超±2℃']},
+            {name: '哥斯达黎加塔尔科莱斯河(美洲鳄)', value: [-85.0, 10.0, 33.5, '6:1→雄性存活率↓60%', '工业污染与高温协同作用']}
         ];
 
         // 温度范围调整
-        var tempRange = [27, 34];
+        var tempRange = [15, 38];
         
         // 配置项
         var option = {
@@ -137,8 +162,8 @@
                 formatter: function(params) {
                     if (params.data) {
                         return '<strong style="font-size:16px;">' + params.name + '</strong><br/>' +
-                               '<span style="font-size:15px;">温度范围: ' + (params.data.value[2]-1.35).toFixed(1) + '°C-' + (params.data.value[2]+1.35).toFixed(1) + '°C</span><br/>' +
-                               '<span style="font-size:15px;">雌性比例: ' + params.data.value[3] + '</span><br/>' +
+                               '<span style="font-size:15px;">温度变化: ' + (params.data.value[2]-1.5).toFixed(1) + '°C-' + (params.data.value[2]+1.5).toFixed(1) + '°C</span><br/>' +
+                               '<span style="font-size:15px;">雌雄比例: ' + params.data.value[3] + '</span><br/>' +
                                '<span style="font-size:15px;">主要因素: ' + params.data.value[4] + '</span>';
                     }
                     return params.name;
@@ -155,7 +180,7 @@
                 realtime: false,
                 calculable: true,
                 inRange: {
-                    color: ['#87CEFA', '#4682B4', '#FFA07A', '#FF6347', '#FF0000']
+                    color: ['#ADD8E6', '#1E90FF', '#FFFF00', '#FFA500', '#FF4500']
                 }
             },
             geo: {
@@ -174,12 +199,12 @@
             },
             series: [
                 {
-                    name: '海龟分布地',
+                    name: '鳄鱼分布地',
                     type: 'scatter',
                     coordinateSystem: 'geo',
                     data: data,
                     symbolSize: function(val) {
-                        return 16 + (val[2] - tempRange[0]) * 2;
+                        return 18 + (val[2] - tempRange[0]) * 1.5;
                     },
                     encode: {
                         value: 2
@@ -188,8 +213,8 @@
                         formatter: function(params) {
                             return [
                                 '{b|' + params.name + '}',
-                                '{c|' + (params.data.value[2]-1.35).toFixed(1) + '°C-' + (params.data.value[2]+1.35).toFixed(1) + '°C}',
-                                '{d|♀ ' + params.data.value[3] + '}'
+                                '{c|' + (params.data.value[2]-1.5).toFixed(1) + '°C-' + (params.data.value[2]+1.5).toFixed(1) + '°C}',
+                                '{d|比例: ' + params.data.value[3] + '}'
                             ].join('\n');
                         },
                         position: 'right',
@@ -240,12 +265,15 @@
                             }
                         };
                     }),
-                    pointSize: 15,
-                    blurSize: 10
+                    pointSize: 20,
+                    blurSize: 15,
+                    gradientColors: ['#ADD8E6', '#1E90FF', '#FFFF00', '#FFA500', '#FF4500'],
+                    minOpacity: 0.4,
+                    maxOpacity: 0.8
                 }
             ],
             title: {
-                text: '全球海龟分布地气温热力图(°C)',
+                text: '全球鳄鱼分布地气温热力图(°C)',
                 subtext: '颜色深浅表示温度高低，点击标记查看详细信息',
                 left: 'center',
                 textStyle: {
