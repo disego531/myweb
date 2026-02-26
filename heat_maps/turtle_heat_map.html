@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>全球主要海龟分布地近十年气温变化及雌性新生海龟占比变化图</title>
+    <meta charset="utf-8">
+    <script src="echarts/echarts.min.js"></script>
+    <script src="echarts/map/js/world.js"></script>
+    <style>
+        #map-container {
+            width: 900px;
+            height: 600px;
+            margin: 0 auto;
+        }
+        .title {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .subtitle {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .data-table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .note {
+            width: 90%;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="title">全球主要海龟分布地近十年气温变化及雌性新生海龟占比变化</h2>
+    <div id="map-container"></div>
+
+    <table class="data-table">
+        <tr>
+            <th>分布区域</th>
+            <th>气温变化范围(℃)</th>
+            <th>雌性新生海龟占比变化</th>
+            <th>关键影响因素</th>
+            <th>数据来源</th>
+        </tr>
+        <tr>
+            <td>澳大利亚大堡礁北部</td>
+            <td>29.3℃–34.0℃</td>
+            <td>99.1%–99.8%</td>
+            <td>沙滩温度持续超过性别阈值</td>
+            <td>长期监测数据(1990-2025)</td>
+        </tr>
+        <tr>
+            <td>佛罗里达东南沿海</td>
+            <td>29.5℃–33.5℃</td>
+            <td>99.3%→100%</td>
+            <td>连续高温导致性别极端失衡</td>
+            <td>海龟医院观测(2021-2025)</td>
+        </tr>
+        <tr>
+            <td>地中海沿岸</td>
+            <td>28.0℃–32.5℃</td>
+            <td>88%→92%</td>
+            <td>海表温度上升与盐度变化</td>
+            <td>气候模型预测</td>
+        </tr>
+        <tr>
+            <td>东太平洋棱皮龟栖息地</td>
+            <td>27.0℃–31.2℃</td>
+            <td>85%–90%</td>
+            <td>深海觅食区与渔业活动叠加</td>
+            <td>IUCN区域报告(2024)</td>
+        </tr>
+        <tr>
+            <td>印度洋阿曼海域</td>
+            <td>30.0℃–34.0℃</td>
+            <td>95%–98.2%</td>
+            <td>高温导致孵化性别比例失调</td>
+            <td>区域研究报告(2020-2025)</td>
+        </tr>
+    </table>
+
+    <div class="note">
+        <p><strong>补充说明：</strong></p>
+        <p>1. <strong>温度阈值机制</strong>：海龟性别由孵化温度决定，临界温度约为29℃（如绿海龟在28℃以下雄性为主，31℃以上几乎全雌性）</p>
+        <p>2. <strong>极端案例</strong>：</p>
+        <ul>
+            <li>澳大利亚大堡礁北部因沙滩温度持续高于29.3℃，近20年雌性幼龟比例超99%</li>
+            <li>佛罗里达近年因高温记录，新生海龟连续四年无雄性记录</li>
+        </ul>
+    </div>
+
+    <script>
+        // 初始化ECharts实例
+        var myChart = echarts.init(document.getElementById('map-container'));
+
+        // 数据准备 - 根据提供的表格数据更新
+        var data = [
+            {name: '澳大利亚大堡礁北部', value: [145.5, -15, 31.65, '99.1%-99.8%', '沙滩温度持续超过性别阈值']},
+            {name: '佛罗里达东南沿海', value: [-80.5, 25.5, 31.5, '99.3%→100%', '连续高温导致性别极端失衡']},
+            {name: '地中海沿岸', value: [12.5, 38, 30.25, '88%→92%', '海表温度上升与盐度变化']},
+            {name: '东太平洋棱皮龟栖息地', value: [-100, 5, 29.1, '85%-90%', '深海觅食区与渔业活动叠加']},
+            {name: '印度洋阿曼海域', value: [58, 20, 32, '95%-98.2%', '高温导致孵化性别比例失调']}
+        ];
+
+        // 温度范围调整
+        var tempRange = [27, 34];
+        
+        // 配置项
+        var option = {
+            backgroundColor: '#F5F5F5',
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    if (params.data) {
+                        return '<strong style="font-size:16px;">' + params.name + '</strong><br/>' +
+                               '<span style="font-size:15px;">温度范围: ' + (params.data.value[2]-1.35).toFixed(1) + '°C-' + (params.data.value[2]+1.35).toFixed(1) + '°C</span><br/>' +
+                               '<span style="font-size:15px;">雌性比例: ' + params.data.value[3] + '</span><br/>' +
+                               '<span style="font-size:15px;">主要因素: ' + params.data.value[4] + '</span>';
+                    }
+                    return params.name;
+                }
+            },
+            visualMap: {
+                min: tempRange[0],
+                max: tempRange[1],
+                text: ['高温', '低温'],
+                textStyle: {
+                    color: '#333',
+                    fontSize: 14
+                },
+                realtime: false,
+                calculable: true,
+                inRange: {
+                    color: ['#87CEFA', '#4682B4', '#FFA07A', '#FF6347', '#FF0000']
+                }
+            },
+            geo: {
+                map: 'world',
+                roam: true,
+                emphasis: {
+                    label: {
+                        show: false
+                    }
+                },
+                itemStyle: {
+                    areaColor: '#EAEAEA',
+                    borderColor: '#AAA',
+                    borderWidth: 0.5
+                }
+            },
+            series: [
+                {
+                    name: '海龟分布地',
+                    type: 'scatter',
+                    coordinateSystem: 'geo',
+                    data: data,
+                    symbolSize: function(val) {
+                        return 16 + (val[2] - tempRange[0]) * 2;
+                    },
+                    encode: {
+                        value: 2
+                    },
+                    label: {
+                        formatter: function(params) {
+                            return [
+                                '{b|' + params.name + '}',
+                                '{c|' + (params.data.value[2]-1.35).toFixed(1) + '°C-' + (params.data.value[2]+1.35).toFixed(1) + '°C}',
+                                '{d|♀ ' + params.data.value[3] + '}'
+                            ].join('\n');
+                        },
+                        position: 'right',
+                        show: true,
+                        rich: {
+                            b: {
+                                fontSize: 14,
+                                fontWeight: 'bold',
+                                color: '#333'
+                            },
+                            c: {
+                                fontSize: 13,
+                                color: '#666'
+                            },
+                            d: {
+                                fontSize: 13,
+                                color: '#E91E63',
+                                padding: [3, 0, 0, 0]
+                            }
+                        },
+                        distance: 15
+                    },
+                    emphasis: {
+                        label: {
+                            show: true
+                        }
+                    },
+                    itemStyle: {
+                        color: function(param) {
+                            var temp = param.data.value[2];
+                            var ratio = (temp - tempRange[0]) / (tempRange[1] - tempRange[0]);
+                            return echarts.color.modifyHSL('#FF0000', 0, 0.5 - ratio * 0.5, 0.5 + ratio * 0.3);
+                        },
+                        shadowBlur: 8,
+                        shadowColor: 'rgba(0, 0, 0, 0.3)'
+                    }
+                },
+                {
+                    name: '温度',
+                    type: 'heatmap',
+                    coordinateSystem: 'geo',
+                    data: data.map(function(item) {
+                        return {
+                            name: item.name,
+                            value: [...item.value],
+                            label: {
+                                show: false
+                            }
+                        };
+                    }),
+                    pointSize: 15,
+                    blurSize: 10
+                }
+            ],
+            title: {
+                text: '全球海龟分布地气温热力图(°C)',
+                subtext: '颜色深浅表示温度高低，点击标记查看详细信息',
+                left: 'center',
+                textStyle: {
+                    color: '#333',
+                    fontSize: 22,
+                    fontWeight: 'bold'
+                },
+                subtextStyle: {
+                    color: '#666',
+                    fontSize: 16
+                }
+            }
+        };
+
+        // 使用配置项显示图表
+        myChart.setOption(option);
+        
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
