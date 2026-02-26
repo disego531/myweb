@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>热图 · 目录索引</title>
+    <title>热图导航 · 智能路径处理</title>
     <style>
         * {
             margin: 0;
@@ -12,498 +12,641 @@
         }
 
         body {
-            background: linear-gradient(145deg, #f7f9fc 0%, #eef2f5 100%);
+            background: linear-gradient(145deg, #f4f9ff 0%, #e6f0fa 100%);
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 2rem;
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 3.2rem;
+            box-shadow: 0 35px 65px -20px #1c3f60b3, inset 0 1px 4px white;
             width: 100%;
-            max-width: 950px;
-            padding: 2.5rem 2.2rem;
-            border: 1px solid rgba(255,255,255,0.5);
-            transition: all 0.2s ease;
+            max-width: 1100px;
+            padding: 2.8rem 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.9);
         }
 
         h1 {
-            font-size: 2.3rem;
-            font-weight: 550;
+            font-size: 2.7rem;
+            font-weight: 620;
             letter-spacing: -0.02em;
-            color: #1a2639;
+            color: #0a2b44;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 0.3rem;
-            border-bottom: 3px solid rgba(0, 80, 130, 0.15);
-            padding-bottom: 0.5rem;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid #a0c4e8;
+            padding-bottom: 0.8rem;
         }
 
-        .subhead {
-            font-size: 1.05rem;
-            color: #2c3e50c9;
-            margin-bottom: 2rem;
+        .source-info {
+            font-size: 1rem;
+            color: #1f4370e6;
+            margin: 1rem 0 2rem 0;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            background: #d9e2ec4d;
-            padding: 0.6rem 1.2rem;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            background: #deecfccc;
+            padding: 0.7rem 2rem;
             border-radius: 60px;
             width: fit-content;
-            backdrop-filter: blur(2px);
+            border: 1px solid white;
         }
 
-        .subhead span {
-            background: #1e3b5a;
+        .source-info code {
+            background: #173e5f;
             color: white;
-            font-weight: 500;
-            font-size: 0.9rem;
-            padding: 0.15rem 0.8rem;
-            border-radius: 30px;
-            margin-left: 0.4rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 520;
         }
 
-        .list-header {
+        .debug-info {
+            background: #2d4b6e;
+            color: #eef5ff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .stats-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 1.5rem 0 1rem 0;
-            color: #1d3b5c;
+            margin: 1.8rem 0 1.4rem 0;
         }
 
-        .list-header h2 {
-            font-weight: 470;
-            font-size: 1.5rem;
+        .stats-bar h2 {
+            font-weight: 550;
+            font-size: 1.8rem;
+            color: #103551;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.6rem;
         }
 
         .badge {
-            background: #1e3b5a;
+            background: #236197;
             color: white;
-            border-radius: 30px;
-            padding: 0.2rem 0.9rem;
-            font-size: 0.85rem;
-            font-weight: 480;
+            border-radius: 40px;
+            padding: 0.3rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: inset 0 1px 4px #bbdbff;
         }
 
-        .heat-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            max-height: 460px;
+        .table-wrapper {
+            max-height: 500px;
             overflow-y: auto;
-            padding-right: 8px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 0.8rem 0.5rem 0.8rem 0.8rem;
+            border-radius: 36px;
+            background: #eaf1fab3;
+            padding: 0.3rem;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 2px 6px #0000000c;
         }
 
-        /* 自定义滚动条 */
-        .heat-grid::-webkit-scrollbar {
-            width: 10px;
-        }
-        .heat-grid::-webkit-scrollbar-track {
-            background: rgba(0,30,50,0.05);
-            border-radius: 30px;
-        }
-        .heat-grid::-webkit-scrollbar-thumb {
-            background: #9bb7d4b3;
-            border-radius: 30px;
-            border: 2px solid rgba(240,245,250,0.4);
-        }
-        .heat-grid::-webkit-scrollbar-thumb:hover {
-            background: #7fa1c2;
-        }
-
-        /* 链接卡片样式 */
-        .heat-link-card {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(2px);
-            border-radius: 60px;
-            padding: 0.7rem 1.2rem 0.7rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 8px -4px rgba(0, 32, 64, 0.08);
-            transition: all 0.2s ease;
-            color: #0b2a41;
-            font-weight: 470;
+        .markdown-table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: 1.05rem;
-            gap: 0.8rem;
+            border-radius: 36px;
+            overflow: hidden;
         }
 
-        .heat-link-card:hover {
-            background: white;
-            border-color: #bed9f0;
-            box-shadow: 0 15px 25px -10px rgba(28, 80, 120, 0.25);
-            transform: translateY(-2px) scale(1.01);
-            color: #003057;
-        }
-
-        .link-icon {
+        .markdown-table thead tr {
             background: #1e3b5a;
             color: white;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
-            flex-shrink: 0;
+            font-weight: 530;
+            text-align: left;
         }
 
-        .file-name {
-            flex: 1;
-            word-break: break-word;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .markdown-table th {
+            padding: 1.2rem 1.8rem;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
         }
 
-        .file-meta {
-            color: #446688;
-            font-size: 0.85rem;
-            display: flex;
+        .markdown-table th:first-child {
+            border-top-left-radius: 30px;
+        }
+        .markdown-table th:last-child {
+            border-top-right-radius: 30px;
+        }
+
+        .markdown-table tbody tr {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid #c9dff5;
+            transition: background 0.15s;
+        }
+
+        .markdown-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .markdown-table td {
+            padding: 1.2rem 1.8rem;
+            color: #102d44;
+            border-bottom: 1px solid #c9dff5;
+        }
+
+        .markdown-table td:first-child {
+            font-weight: 500;
+        }
+
+        .markdown-table td a {
+            color: #1d5191;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            background: rgba(200, 219, 240, 0.5);
-            padding: 0.2rem 1rem 0.2rem 0.8rem;
+            background: #e3f0ff;
+            padding: 0.3rem 1.2rem 0.3rem 1rem;
             border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid white;
+            transition: all 0.15s;
+            word-break: break-word;
         }
 
-        .file-meta .dot {
-            width: 6px;
-            height: 6px;
-            background: #346fa0;
-            border-radius: 20px;
+        .markdown-table td a:hover {
+            background: #cbe3ff;
+            border-color: #8eb9e6;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px -8px #1b3d60;
         }
 
         .empty-state {
             text-align: center;
-            padding: 3.2rem 1.5rem;
-            background: rgba(255, 255, 255, 0.5);
+            padding: 4rem 2rem;
+            background: #f0f8ffed;
             border-radius: 3rem;
-            border: 2px dashed rgba(90, 140, 190, 0.3);
-            color: #2d4b6e;
+            border: 2px dashed #8fb1d1;
+            color: #1f4d78;
             font-size: 1.2rem;
-            backdrop-filter: blur(4px);
-            margin: 0.8rem 0;
         }
 
-        .empty-state svg {
-            opacity: 0.5;
-            margin-bottom: 0.5rem;
+        .error-tip {
+            background: #feeceb;
+            border-left: 6px solid #c25a4a;
+            padding: 1.5rem 2.5rem;
+            border-radius: 40px;
+            margin: 1rem 0;
+            color: #4f221e;
+            font-weight: 450;
+            word-break: break-word;
         }
 
-        .footer-note {
-            margin-top: 1.5rem;
-            color: #3d5a78b3;
-            font-size: 0.9rem;
-            border-top: 1px dashed #b3c9df;
-            padding-top: 1rem;
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #a0bcdb;
+            border-top-color: #103450;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .footer-bar {
+            margin-top: 2.2rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #c2d8f1;
+            padding-top: 1.5rem;
         }
 
-        .path-indicator {
-            background: #ced9e8a6;
-            padding: 0.35rem 1.2rem;
+        .file-location {
+            background: #e5effb;
+            padding: 0.5rem 1.8rem;
             border-radius: 40px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.95rem;
-            color: #103450;
+            color: #113853;
+            font-size: 0.98rem;
+            font-weight: 480;
+            border: 1px solid white;
+            font-family: monospace;
         }
 
-        .btn-refresh {
+        .refresh-btn {
             background: transparent;
-            border: 1.5px solid #acc4dd;
-            padding: 0.3rem 1.4rem;
+            border: 2px solid #a2c2e5;
+            padding: 0.5rem 2.2rem;
             border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #1f4970;
+            font-size: 1rem;
+            font-weight: 560;
+            color: #1b4f7a;
             cursor: pointer;
             transition: all 0.2s;
             backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
         }
 
-        .btn-refresh:hover {
-            background: #e1ecf9;
-            border-color: #7f9fc7;
+        .refresh-btn:hover {
+            background: #e3efff;
+            border-color: #3f7eb0;
             transform: scale(0.98);
+        }
+
+        .markdown-icon {
+            font-size: 1.2rem;
+            margin-right: 0.2rem;
+        }
+
+        .path-test {
+            background: #f0f0f0;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #444;
         }
     </style>
 </head>
 <body>
 <div class="glass-panel">
     <h1>
-        <span>🌡️</span> 热图 · 集
-        <span style="font-size: 1.2rem; margin-left: auto; background: #b7d0e9; padding: 0.2rem 1rem; border-radius: 60px; font-weight: 400;">heat_maps</span>
+        <span>📋</span> 热图清单 · 智能路径
+        <span style="font-size: 1.2rem; margin-left: auto; background: #bed6f2; padding: 0.3rem 1.5rem; border-radius: 60px; font-weight: 430;">list.md</span>
     </h1>
-    <div class="subhead">
-        📂 同目录下 /heat_maps 子目录  ·  自动加载所有网页文件
-        <span id="counter-badge">扫描中...</span>
+
+    <!-- 显示当前路径信息 -->
+    <div class="source-info">
+        <span>📂 当前页面 URL:</span>
+        <code id="currentUrlDisplay">计算中...</code>
+        <span>⬇️ 尝试加载</span>
+        <code id="listPathDisplay">./heat_maps/list.md</code>
     </div>
 
-    <!-- 动态列表容器 -->
-    <div class="list-header">
+    <!-- 计数 + 标题 -->
+    <div class="stats-bar">
         <h2>
-            <span>🔗</span> 可用链接
+            <span>🔗</span> 映射条目
         </h2>
-        <div class="badge" id="file-count-badge">——</div>
+        <div class="badge" id="countDisplay">——</div>
     </div>
 
-    <div id="heat-map-list" class="heat-grid">
-        <!-- 这里由javascript动态注入内容 -->
-        <div class="empty-state" id="loading-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3b6b9b" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="2 6">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
-            </svg><br>
-            正在扫描 <span style="font-family: monospace;">./heat_maps/</span> 目录...
+    <!-- 表格容器 (动态渲染) -->
+    <div id="tableContainer" class="table-wrapper">
+        <!-- 加载占位 -->
+        <div class="empty-state" id="loadingPlaceholder">
+            <div style="display: flex; gap: 0.8rem; align-items: center; justify-content: center;">
+                <span class="loading-spinner"></span>
+                正在尝试加载 <code>heat_maps/list.md</code> ...
+            </div>
         </div>
     </div>
 
-    <div class="footer-note">
-        <span class="path-indicator" id="path-display">📁 ./heat_maps/</span>
-        <button class="btn-refresh" id="refreshButton" title="重新扫描子目录">↻ 刷新列表</button>
+    <!-- 底部：刷新 + 路径提示 -->
+    <div class="footer-bar">
+        <span class="file-location" id="fullPathDisplay">计算路径中...</span>
+        <button class="refresh-btn" id="refreshBtn">
+            <span>↻</span> 重新加载
+        </button>
     </div>
 </div>
 
 <script>
     (function() {
-        // 合法网页扩展名 (不区分大小写)
-        const WEB_EXTENSIONS = new Set(['.html', '.htm', '.xhtml', '.shtml', '.php', '.asp', '.aspx', '.jsp']); // 可自行增删
+        // DOM 元素
+        const tableContainer = document.getElementById('tableContainer');
+        const countDisplay = document.getElementById('countDisplay');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const currentUrlDisplay = document.getElementById('currentUrlDisplay');
+        const listPathDisplay = document.getElementById('listPathDisplay');
+        const fullPathDisplay = document.getElementById('fullPathDisplay');
 
-        // 获取容器和动态元素
-        const listContainer = document.getElementById('heat-map-list');
-        const counterSpan = document.getElementById('counter-badge');
-        const fileCountBadge = document.getElementById('file-count-badge');
-        const pathDisplay = document.getElementById('path-display');
-        const refreshBtn = document.getElementById('refreshButton');
-
-        // 清除加载占位
-        function removePlaceholder() {
-            const placeholder = document.getElementById('loading-placeholder');
-            if (placeholder) placeholder.style.display = 'none';
+        // 获取当前页面的URL路径信息
+        function getBasePath() {
+            // 获取当前页面的完整URL
+            const currentUrl = window.location.href;
+            // 获取当前页面的路径部分（不包括域名）
+            const pathname = window.location.pathname;
+            
+            // 显示当前URL
+            currentUrlDisplay.textContent = currentUrl;
+            
+            // 计算index.html所在的目录
+            let baseDir = '';
+            if (pathname.includes('/')) {
+                // 去掉文件名，只保留目录路径
+                const lastSlashIndex = pathname.lastIndexOf('/');
+                if (lastSlashIndex > 0) {
+                    baseDir = pathname.substring(0, lastSlashIndex + 1);
+                } else {
+                    baseDir = '/';
+                }
+            }
+            
+            return {
+                fullUrl: currentUrl,
+                pathname: pathname,
+                baseDir: baseDir,
+                origin: window.location.origin
+            };
         }
 
-        // 显示空状态（当列表为空时调用）
-        function showEmptyState() {
-            listContainer.innerHTML = `
-                <div class="empty-state">
-                    <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">📭</span>
-                    在 <strong>heat_maps</strong> 中没有发现任何网页文件<br>
-                    <span style="font-size: 0.95rem; opacity: 0.7;">(支持 .html, .htm, .xhtml, .php, .asp 等)</span>
-                </div>
-            `;
-        }
-
-        // 核心函数：获取同目录下 heat_maps 子目录的所有网页链接
-        function loadHeatMapPages() {
-            // 显示加载中状态 (保留旧列表或者显示占位)
-            // 为了友好，如果当前列表为空或只有空状态，显示一个微型加载卡片
-            const currentContent = listContainer.innerHTML;
-            listContainer.innerHTML = `
-                <div class="empty-state" style="padding: 2rem;">
-                    <div style="display: flex; gap: 0.7rem; align-items: center; justify-content: center;">
-                        <span style="width: 20px; height: 20px; border: 3px solid #a0c0e0; border-top-color: #1e3b5a; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
-                        <span>刷新目录列表...</span>
-                    </div>
-                </div>
-                <style>
-                    @keyframes spin { to { transform: rotate(360deg); } }
-                </style>
-            `;
-
-            // 模拟获取目录下文件 (因为浏览器环境无法直接读取服务器文件夹，我们采用已知可行方法:
-            // 尝试 fetch 一个辅助文件? 但最可靠的是通过已知索引或约定。由于题目要求“自动加载该目录同级的heat_maps子目录下的所有网页，以超链接展示”，
-            // 在纯静态页面中无法实时读取服务器文件列表。但我们可以使用一种合理且无后端的方式：约定通过请求一个预生成的文件列表或使用目录索引。
-            // 若不允许后端，一般部署时可通过脚本生成静态列表。但这里我实现一种基于约定+动态尝试HEAD请求或构建可能的文件列表？
-            // 无法真正遍历，但可以认为题目是在同目录下有一个heat_maps文件夹，而index要展示里面所有的html。
-            // 为了满足功能演示和视觉感受，并且代码完全可运行，我采用一种常见优雅的“模拟”但实际基于构造已知文件的模式？
-            // 更好的思路：我们可以动态生成基于常见文件的链接，但是不能凭空捏造。
-            // 但用户预期是一个工作示例: 我们能够从服务器上通过.htaccess或Fetch目录列表? 浏览器禁止直接读取目录。
-            // 在真实场景下通常需要后端配合，或者提前生成文件列表。但考题可能是考察“如何发起请求并渲染”，我决定采用一种非侵入式但原理正确的做法：
-            // 尝试fetch heat_maps/ 目录 (如果服务器配置了Indexes，会返回一个页面，但无法直接解析)。所以无法可靠实现。
-            // 为了尊重题目并保持可用，我提供一个模拟的、基于初始化的占位? 但那样就失去了动态的意义。
-            // 因此我在这个版本里采用一种更实际的方案：假设同目录下有一个heat_maps/，并且我们通过请求一个存在的文件列表？但不可行。
-            // 同时作为一个高质量示例，我可以手动内置一个演示列表，但用户希望自动加载，因此我实现一种可扩展的方式：采用fetch尝试读取一个 heat_maps/files.json 文件? 但题目没有提及。
-            // 为了解决这个问题，我们可以采用“假如heat_maps目录下有一些文件，以下展示获取到的”但实际无法获取。但是我可以模拟检测window.location，提示用服务器环境。
-            // 但是为了确保打开页面能看到漂亮的列表以及“自动加载”的概念，我决定采用一种策略：利用已知的link[rel=index]或者目录列表？不可靠。
-            // 但是大多数示例中，大家会使用一个预先生成的清单。我让这个页面更像一个管理界面，但会显示从“fetch 尝试”如果失败则展示说明。
-            // 但我也不能欺骗用户。更优雅的方式：使用fetch发送一个请求到 heat_maps/?json 或者类似？但无后端。
-            // 因此我采取了一种最符合题目字面意思且能在任何静态托管工作的方式：使用import.meta.url? 不对。
-            // 此时——我可以使用一个技巧：读取当前页面目录，发起一个请求，如果服务器开启了 directory listing 且返回HTML，可以解析其中的a标签。
-            // 但这很复杂且跨域。但因为是同目录，可以尝试fetch heat_maps/ 并解析链接。
-            // 完全可行：很多静态文件服务器（如nginx、simplehttp）会返回一个目录列表。如果开启索引，就可以解析。
-            // 为了真实模拟，我就采用此方法！这完全可以作为“自动加载该目录同级的heat_maps子目录下的所有网页”的实际实现。
-            // 下面实现解析fetch得到的HTML，提取href并且过滤网页扩展名。
-            // 这样既动态又真实，只需要服务器开启index或者有一个可读的目录。即使没有开启，会catch然后给提示。
-            // 更符合题意。同时支持用户点击刷新。我决定采用此方案。
-
-            const directoryUrl = './heat_maps/';  // 同目录下heat_maps
-
-            fetch(directoryUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`无法读取目录 (HTTP ${response.status})`);
-                    }
-                    return response.text();
-                })
-                .then(htmlText => {
-                    // 解析HTML中的a标签 (适用于Apache/nginx简易目录列表)
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, 'text/html');
-                    const anchors = doc.querySelectorAll('a'); // 获取所有链接
-                    const files = [];
-
-                    anchors.forEach(a => {
-                        let href = a.getAttribute('href');
-                        if (!href || href === '../' || href.endsWith('/') || href.startsWith('?') || href === '/' || href === '#') {
-                            return; // 排除目录和无效链接
-                        }
-                        // 解码处理，保留原始文件名
-                        const decodedHref = decodeURIComponent(href);
-                        // 检查扩展名
-                        const lowerHref = decodedHref.toLowerCase();
-                        const hasWebExt = Array.from(WEB_EXTENSIONS).some(ext => lowerHref.endsWith(ext));
-                        if (hasWebExt) {
-                            // 忽略查询参数? 但保留完整href
-                            files.push({
-                                name: decodedHref,
-                                url: href,  // 原样保留，可能包含编码
-                                displayName: decodedHref.split('/').pop() || decodedHref
-                            });
-                        }
-                    });
-
-                    // 去重 (基于name)
-                    const uniqueFiles = Array.from(new Map(files.map(f => [f.name, f])).values());
-
-                    renderFileList(uniqueFiles, directoryUrl);
-                })
-                .catch(err => {
-                    console.warn('fetch目录失败, 使用回显提示或者模拟演示', err);
-                    // 为了不白屏，显示一个友好但模拟列表，同时给出说明这不是真实的目录列表（因为服务器未开启索引）
-                    // 但是我们可以构造两个样例，说明需要实际文件。或者展示demo，并提示“检测不到目录列表”。
-                    // 但很多情况下（例如github pages 不支持目录索引），所以为了让页面不显得简陋，我提供一个示意性列表
-                    // 同时保留提示，说明需要真实文件。但题目期望是能够自动加载同目录heat_maps下所有网页，现在无法读取，可以用替代方案?
-                    // 我决定展示一个demo占位，但依然显示模拟条目作为演示（体现UI效果），并且在页面显式说明当前环境无法获取目录列表。
-                    // 这是最诚实的做法。但为了满足“自动加载”，我可以保留手动模拟。
-                    // 但你可以将heat_maps下的文件配置真实列表，我们这样做：如果能fetch则真实加载；如果失败，展示预设示例并提醒。
-                    // 这样既保留了功能，又能在大多数静态托管看到效果。
-                    const demoFiles = [
-                        { name: 'temperature_2m.html', url: 'temperature_2m.html', displayName: 'temperature_2m.html' },
-                        { name: 'precipitation_map.html', url: 'precipitation_map.html', displayName: 'precipitation_map.html' },
-                        { name: 'pressure_anomaly.xhtml', url: 'pressure_anomaly.xhtml', displayName: 'pressure_anomaly.xhtml' },
-                        { name: 'heatwave_alert.php', url: 'heatwave_alert.php', displayName: 'heatwave_alert.php' },
-                    ];
-                    // 添加说明
-                    renderFileList(demoFiles, directoryUrl, true);
+        // 构建完整的list.md路径（尝试多种可能性）
+        function getListMdPaths() {
+            const pathInfo = getBasePath();
+            const paths = [];
+            
+            // 方法1: 基于当前目录的相对路径（最常用）
+            paths.push({
+                url: './heat_maps/list.md',
+                description: '相对路径 (./heat_maps/list.md)'
+            });
+            
+            // 方法2: 基于baseDir的绝对路径
+            if (pathInfo.baseDir) {
+                const absolutePath = pathInfo.baseDir + 'heat_maps/list.md';
+                paths.push({
+                    url: absolutePath,
+                    description: '基于当前目录的绝对路径'
                 });
+            }
+            
+            // 方法3: 根目录相对路径
+            paths.push({
+                url: '/heat_maps/list.md',
+                description: '网站根目录相对路径'
+            });
+            
+            // 方法4: 尝试去掉可能的多级目录
+            if (pathInfo.pathname.split('/').length > 2) {
+                paths.push({
+                    url: '../heat_maps/list.md',
+                    description: '上级目录相对路径'
+                });
+            }
+            
+            return paths;
         }
 
-        // 渲染文件列表
-        function renderFileList(files, baseUrl, isDemo = false) {
-            listContainer.innerHTML = '';  // 清空容器
+        // 尝试多个路径加载list.md
+        async function tryLoadListMd() {
+            const paths = getListMdPaths();
+            
+            // 显示尝试的路径
+            listPathDisplay.innerHTML = paths.map(p => `<span class="path-test">${p.description}</span>`).join(' ');
+            
+            // 依次尝试每个路径
+            for (let i = 0; i < paths.length; i++) {
+                const path = paths[i];
+                const urlWithCache = path.url + '?t=' + Date.now();
+                
+                try {
+                    console.log(`尝试加载: ${path.url} (${path.description})`);
+                    
+                    const response = await fetch(urlWithCache, { 
+                        cache: 'no-store', 
+                        credentials: 'same-origin',
+                        method: 'GET'
+                    });
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text && text.trim()) {
+                            // 成功加载，显示使用的路径
+                            fullPathDisplay.textContent = `✅ 成功加载: ${path.url}`;
+                            return { success: true, content: text, usedPath: path.url };
+                        }
+                    }
+                } catch (e) {
+                    console.log(`路径 ${path.url} 加载失败:`, e.message);
+                    // 继续尝试下一个路径
+                }
+            }
+            
+            // 所有路径都失败
+            fullPathDisplay.textContent = '❌ 所有路径尝试均失败';
+            return { success: false, content: null, usedPath: null };
+        }
 
-            if (!files || files.length === 0) {
-                showEmptyState();
-                counterSpan.innerHTML = `(0)`;
-                fileCountBadge.textContent = '0 项';
+        /**
+         * 解析 Markdown 表格
+         */
+        function parseMarkdownTable(markdownText) {
+            const lines = markdownText.split(/\r?\n/);
+            const rows = [];
+            let headerParsed = false;
+            let nameColIndex = -1, pathColIndex = -1;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line.startsWith('|') || !line.endsWith('|')) {
+                    continue;
+                }
+
+                const cleaned = line.slice(1, -1).trim();
+                const cells = cleaned.split('|').map(cell => cell.trim());
+
+                if (cells.length === 0) continue;
+
+                // 跳过分隔行
+                if (cells.some(cell => cell.includes('---') || cell.includes('--:'))) {
+                    continue;
+                }
+
+                // 解析表头
+                if (!headerParsed) {
+                    for (let j = 0; j < cells.length; j++) {
+                        const lower = cells[j].toLowerCase();
+                        if (lower.includes('显示名称') || lower.includes('display') || lower.includes('名称')) {
+                            nameColIndex = j;
+                        } else if (lower.includes('文件路径') || lower.includes('file') || lower.includes('path') || lower.includes('路径')) {
+                            pathColIndex = j;
+                        }
+                    }
+                    if (nameColIndex === -1 && cells.length >= 2) {
+                        nameColIndex = 0;
+                        pathColIndex = 1;
+                    }
+                    headerParsed = true;
+                    continue;
+                }
+
+                // 提取数据行
+                if (nameColIndex !== -1 && pathColIndex !== -1 && cells.length > Math.max(nameColIndex, pathColIndex)) {
+                    let display = cells[nameColIndex].trim();
+                    let filepath = cells[pathColIndex].trim();
+
+                    display = display.replace(/\*\*/g, '').replace(/__/g, '');
+                    filepath = filepath.replace(/\*\*/g, '').replace(/__/g, '');
+
+                    if (filepath.startsWith('`') && filepath.endsWith('`')) {
+                        filepath = filepath.slice(1, -1);
+                    }
+
+                    if (display && filepath) {
+                        rows.push({ display, filepath });
+                    }
+                }
+            }
+
+            return rows;
+        }
+
+        // 构建完整的文件URL
+        function buildFileUrl(filepath) {
+            // 如果已经是完整的HTTP URL，直接使用
+            if (filepath.startsWith('http://') || filepath.startsWith('https://')) {
+                return filepath;
+            }
+            
+            // 移除开头的 ./ 或 /
+            let cleanPath = filepath.replace(/^\.?\//, '');
+            
+            // 获取当前页面的基础路径
+            const pathInfo = getBasePath();
+            const baseDir = pathInfo.baseDir;
+            
+            // 构建完整URL
+            if (cleanPath.startsWith('heat_maps/')) {
+                return baseDir + cleanPath;
+            } else if (cleanPath.includes('heat_maps/')) {
+                return baseDir + cleanPath;
+            } else {
+                return baseDir + 'heat_maps/' + cleanPath;
+            }
+        }
+
+        // 渲染表格
+        function renderTable(entries) {
+            if (!entries || entries.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="empty-state">
+                        <span style="font-size: 3rem; display: block; margin-bottom: 0.5rem;">📭</span>
+                        没有从 <code>list.md</code> 中解析到任何有效条目
+                    </div>
+                `;
+                countDisplay.textContent = '0 项';
                 return;
             }
 
-            // 排序：按文件名
-            files.sort((a, b) => a.displayName.localeCompare(b.displayName));
+            let tableHtml = `
+                <table class="markdown-table">
+                    <thead>
+                        <tr>
+                            <th>显示名称</th>
+                            <th>文件路径 (超链接)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
 
-            files.forEach(file => {
-                // 构建完整链接 (确保和base拼接正确)
-                let fullUrl = file.url;
-                // 如果url是相对路径，且不包含base，就拼上 ./heat_maps/
-                if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://') && !fullUrl.startsWith('//')) {
-                    // 避免双斜杠
-                    if (fullUrl.startsWith('./')) {
-                        fullUrl = './heat_maps/' + fullUrl.substring(2);
-                    } else if (fullUrl.startsWith('/')) {
-                        fullUrl = './heat_maps' + fullUrl;  // 极少情况
-                    } else {
-                        fullUrl = './heat_maps/' + fullUrl;
-                    }
-                }
-                // 创建卡片
-                const link = document.createElement('a');
-                link.href = fullUrl;
-                link.target = '_blank';   // 新标签打开，保留原页面
-                link.rel = 'noopener noreferrer';
-                link.className = 'heat-link-card';
+            entries.forEach(entry => {
+                const displayEscaped = entry.display.replace(/[&<>"]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    if (m === '"') return '&quot;';
+                    return m;
+                });
+                
+                const filepathEscaped = entry.filepath.replace(/[&<>"]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    if (m === '"') return '&quot;';
+                    return m;
+                });
+                
+                const href = buildFileUrl(entry.filepath);
+                const hrefAttr = href.replace(/[&<>"]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '"') return '&quot;';
+                    return m;
+                });
 
-                // 获取文件扩展名作为图标备选
-                const ext = file.displayName.includes('.') ? file.displayName.split('.').pop() : '🌐';
-
-                link.innerHTML = `
-                    <span class="link-icon">📊</span>
-                    <span class="file-name" title="${file.displayName}">${file.displayName}</span>
-                    <span class="file-meta"><span class="dot"></span>.${ext}</span>
+                tableHtml += `
+                    <tr>
+                        <td>${displayEscaped}</td>
+                        <td><a href="${hrefAttr}" target="_blank" rel="noopener noreferrer">📁 ${filepathEscaped}</a></td>
+                    </tr>
                 `;
-                listContainer.appendChild(link);
             });
 
-            // 更新计数器
-            const count = files.length;
-            counterSpan.innerHTML = `(${count})`;
-            fileCountBadge.textContent = `${count} ${count === 1 ? '个文件' : '个文件'}`;
+            tableHtml += `</tbody></table>`;
+            tableContainer.innerHTML = tableHtml;
+            countDisplay.textContent = `${entries.length} 项`;
+        }
 
-            if (isDemo) {
-                // 如果为演示模式，在列表上方或下方添加提示
-                const hint = document.createElement('div');
-                hint.style.marginTop = '0.8rem';
-                hint.style.padding = '0.5rem 1rem';
-                hint.style.background = '#ffe8c8b3';
-                hint.style.borderRadius = '40px';
-                hint.style.fontSize = '0.9rem';
-                hint.style.border = '1px solid #d1b482';
-                hint.innerHTML = '⚠️ 当前为演示列表 (无法读取真实目录，请确保服务器开启索引或文件存在)';
-                listContainer.insertAdjacentElement('afterend', hint);
+        // 显示错误
+        function showError(message) {
+            tableContainer.innerHTML = `
+                <div class="error-tip">
+                    <strong>⚠️ 加载失败</strong><br>
+                    ${message.replace(/[&<>]/g, function(m) {
+                        if (m === '&') return '&amp;';
+                        if (m === '<') return '&lt;';
+                        if (m === '>') return '&gt;';
+                        return m;
+                    })}<br>
+                    <span style="font-size:0.95rem;">请确认 <code>heat_maps/list.md</code> 文件存在且可读。</span>
+                </div>
+            `;
+            countDisplay.textContent = '错误';
+        }
+
+        // 显示加载中
+        function showLoading() {
+            tableContainer.innerHTML = `
+                <div class="empty-state">
+                    <div style="display: flex; gap: 0.8rem; align-items: center; justify-content: center;">
+                        <span class="loading-spinner"></span>
+                        尝试多个路径加载 <code>list.md</code> ...
+                    </div>
+                </div>
+            `;
+        }
+
+        // 主加载函数
+        async function loadMarkdownAndRender() {
+            showLoading();
+            
+            const result = await tryLoadListMd();
+            
+            if (result.success && result.content) {
+                const entries = parseMarkdownTable(result.content);
+                renderTable(entries);
+            } else {
+                const pathInfo = getBasePath();
+                showError(`无法加载 list.md 文件。已尝试多个路径。<br>当前页面路径: ${pathInfo.pathname}<br>请确保文件存在于正确的目录。`);
             }
         }
 
-        // 初始化加载
-        loadHeatMapPages();
+        // 初始化
+        loadMarkdownAndRender();
 
         // 刷新按钮
         refreshBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            loadHeatMapPages();
+            loadMarkdownAndRender();
         });
-
-        // 显示路径
-        pathDisplay.textContent = '📁 ./heat_maps/';
     })();
 </script>
 
-<!-- 备用确保即使script之前加载报错也不影响基本样式 -->
 <noscript>
-    <div style="background: #ffdddd; padding: 2rem; border-radius: 2rem; text-align: center;">
-        ⚠️ 您的浏览器未启用 JavaScript，无法自动加载文件列表。<br>
-        请手动访问 <code>./heat_maps/</code> 目录。
+    <div style="background:#f3dddd; padding:2rem; border-radius:2rem; text-align:center; margin:2rem 0;">
+        ⚠️ 您的浏览器未启用 JavaScript，无法加载动态内容。<br>
+        请直接查看 <code>./heat_maps/list.md</code> 文件。
     </div>
 </noscript>
 </body>
