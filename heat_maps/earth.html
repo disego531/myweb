@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts 3D 地球结构图</title>
+    <!-- 引入 ECharts 核心库 -->
+    <script src="echarts/echarts.min.js"></script>
+    <!-- 引入 ECharts GL (3D 支持) -->
+    <script src="echarts/echarts-gl.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        #chart-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        /* 简单标题装饰，可选 */
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00aaff;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 标题 -->
+    <div class="title">🌍 3D 地球结构图 | ECharts + WebGL</div>
+    <!-- ECharts 容器 -->
+    <div id="chart-container"></div>
+
+    <script>
+        (function() {
+            // 初始化 ECharts 实例
+            const chart = echarts.init(document.getElementById('chart-container'));
+
+            // 定义地球的纹理图片（使用 ECharts 官方示例中使用的地球纹理，确保跨域和可用性）
+            // 如果网络请求失败，可以替换为其他可靠的图片地址，这里使用 echarts 官方示例中常见的纹理
+            const earthTexture = 'https://cdn.jsdelivr.net/gh/apache/echarts-examples@gh-pages/public/data-gl/asset/earth.jpg';
+            
+            // 配置项
+            const option = {
+                // 背景色设为深空黑色
+                backgroundColor: '#000',
+                // 提示框，鼠标悬浮时显示
+                tooltip: {
+                    show: false  // 地球本身不需要提示，如果需要标记点可以开启，这里关闭保持简洁
+                },
+                // 系列配置：使用 globe 组件
+                series: [
+                    {
+                        type: 'globe',           // 3D 地球类型
+                        // 地球的半径，根据画布大小自适应，这里设为 100 效果较好
+                        radius: 100,
+                        // 是否开启旋转动画
+                        animation: true,
+                        // 地球的纹理设置
+                        globe: {
+                            // 基础纹理（地球表面贴图）
+                            baseTexture: earthTexture,
+                            // 是否显示大气层光晕（环境光）
+                            environment: '#000',  // 环境背景色设为黑色，突出地球
+                            // 地球表面的高度光（增加立体感）
+                            heightTexture: earthTexture, // 使用相同纹理作为高度图可产生轻微地形感（可选）
+                            // 位移贴图，轻微增加地形起伏视觉效果，不设置也可
+                            displacementTexture: earthTexture,
+                            // 位移缩放系数，使地形稍微有起伏，值不宜过大
+                            displacementScale: 0.1,
+                            // 位移偏移量
+                            displacementBias: 0,
+                            // 地球材质颜色
+                            color: '#fff',
+                            // 光照设置
+                            light: {
+                                // 环境光强度
+                                ambient: {
+                                    intensity: 0.8
+                                },
+                                // 主光源（平行光）设置
+                                main: {
+                                    intensity: 1.2,
+                                    shadow: true,      // 开启阴影增强立体感
+                                    shadowQuality: 'high',
+                                    alpha: 40,         // 光源水平角度
+                                    beta: 30           // 光源垂直角度
+                                },
+                                // 辅助光源
+                                ambientLight: {
+                                    intensity: 0.5
+                                }
+                            },
+                            // 后处理效果，略微增加泛光让地球更亮
+                            postEffect: {
+                                enable: true,
+                                bloom: {
+                                    enable: true,
+                                    intensity: 0.2
+                                },
+                                SSAO: {
+                                    enable: true,
+                                    radius: 2,
+                                    intensity: 1.5
+                                }
+                            },
+                            // 是否显示地球的经纬度网格线（默认 false，这里不显示）
+                            showGlobe: true,
+                            // 视角控制
+                            viewControl: {
+                                // 自动旋转
+                                autoRotate: true,
+                                // 旋转速度
+                                autoRotateSpeed: 10,
+                                // 旋转灵敏度
+                                rotateSensitivity: 2,
+                                // 缩放灵敏度
+                                zoomSensitivity: 2,
+                                // 初始距离
+                                distance: 250,
+                                // 中心点
+                                center: [0, 0, 0],
+                                // 垂直旋转角度限制，避免看到背面空白
+                                minBeta: -Infinity,
+                                maxBeta: Infinity,
+                                // 倾斜角度
+                                alpha: 30,
+                                beta: 0
+                            },
+                            // 图层背景色（在 globe 内部）
+                            // 注意：globe 内部没有直接背景色设置，使用 environment 整体背景
+                        },
+                        // 在地球上添加一些标记点来增强科技感（可选，但不是必须，为了美观加入几个光点）
+                        // 注意：globe 系列本身不支持 scatter3D 那样直接标记，需要通过 scatter3D 系列或者使用 GEO 坐标？
+                        // 但 globe 组件支持 'lines3D' 或 'scatter3D' 与地理坐标结合？实际上 globe 不支持直接的地理坐标标记，
+                        // 如果需要标记点，需要将经纬度转换为三维坐标，比较复杂。为了保持简洁，这里不添加标记点，纯地球。
+                    }
+                ],
+                // 添加一个额外的环境光或者辅助元素？不需要
+            };
+
+            // 设置配置项并渲染
+            chart.setOption(option);
+
+            // 窗口大小变化时自适应
+            window.addEventListener('resize', function() {
+                chart.resize();
+            });
+
+            // 可选：添加一个加载完成后的微调（ECharts GL 有时纹理加载需要时间）
+            // 但不需要额外操作
+
+            // 注意：如果纹理图片因为网络原因加载失败，会显示为黑色或默认颜色。
+            // 为了更好的体验，可以添加一个备用纹理（如果主纹理失败，可以尝试另一个CDN）
+            // 但 ECharts 本身不提供纹理加载失败的事件，所以这里只能依靠图片的可用性。
+            // 大多数情况下，echarts.apache.org 的图片是可以访问的。
+
+            // 如果发现地球没有纹理或者全黑，可以尝试将 earthTexture 替换为以下地址之一：
+            // 'https://cdn.jsdelivr.net/gh/apache/echarts-examples@gh-pages/public/data-gl/asset/earth.jpg'
+            // 或者 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'
+            // 但为了保持代码简洁，这里保留官方示例的图片。
+
+            // 添加一个小的延迟检查，如果纹理未加载可以给出提示？不必要。
+        })();
+    </script>
+</body>
+</html>

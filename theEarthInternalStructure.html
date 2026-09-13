@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地球内部结构剖面图 · 3D</title>
+<style>
+  :root{
+    --ink:#12212f;
+    --muted:#68798d;
+    --line:#e3eaf3;
+    --line-2:#edf3f9;
+    --blue:#2f8fd6;
+    --deep:#0d3b60;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+    background:#ffffff;
+    color:var(--ink);
+    overflow:hidden;
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    height:100vh;height:100dvh;
+    max-width:1600px;margin:0 auto;
+    padding:12px 18px 14px;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .hero{
+    flex:none;display:flex;align-items:baseline;justify-content:center;
+    gap:16px;flex-wrap:wrap;
+  }
+  .hero h1{
+    font-size:clamp(16px,1.6vw,22px);font-weight:800;letter-spacing:.02em;
+    background:linear-gradient(100deg,#0d3b60,#2f8fd6 60%,#0d3b60);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero .sub{font-size:11.5px;color:var(--muted);letter-spacing:.02em;}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 1px 2px rgba(16,42,67,.04), 0 8px 24px rgba(16,42,67,.05);
+  }
+  .workspace{
+    flex:1;min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+    gap:12px;
+  }
+  .diagram-card{
+    display:flex;flex-direction:column;min-height:0;
+    padding:10px 12px 8px;position:relative;
+  }
+  .tabs{
+    flex:none;display:flex;gap:6px;background:#f2f6fb;
+    border:1px solid var(--line);border-radius:11px;padding:4px;
+    width:fit-content;margin:0 auto 6px;
+  }
+  .tab{
+    font-family:inherit;font-size:12.5px;font-weight:600;
+    color:var(--muted);background:transparent;border:none;cursor:pointer;
+    padding:6px 18px;border-radius:8px;transition:.2s;
+  }
+  .tab:hover{color:var(--blue);}
+  .tab.active{
+    color:#fff;background:linear-gradient(135deg,#4fb4f0,#2f8fd6);
+    box-shadow:0 3px 10px rgba(47,143,214,.32);
+  }
+  .mode-desc{
+    flex:none;text-align:center;font-size:11px;color:var(--muted);
+    margin-bottom:2px;min-height:15px;
+  }
+  #canvas-wrap{
+    flex:1;min-height:0;position:relative;
+    border-radius:12px;overflow:hidden;background:#f7fbff;
+  }
+  #canvas-wrap canvas{display:block;width:100%;height:100%;}
+
+  #loading{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#f7fbff;color:var(--muted);font-size:13px;z-index:5;
+    transition:opacity .4s;
+  }
+  #loading.hide{opacity:0;pointer-events:none;}
+
+  .label-3d{
+    font-size:11px;font-weight:600;color:#0d3b60;
+    background:rgba(255,255,255,.88);
+    border:1px solid rgba(47,143,214,.35);
+    border-radius:6px;padding:2px 7px;
+    white-space:nowrap;pointer-events:none;
+    box-shadow:0 2px 8px rgba(16,42,67,.08);
+  }
+  .label-3d small{display:block;font-weight:400;font-size:9.5px;color:#5b748c;line-height:1.4;}
+
+  /* 地心标签稍微强调 */
+  .label-3d-center{
+    border-color: rgba(232,137,12,.55);
+    box-shadow:0 0 0 3px rgba(240,162,2,.10), 0 2px 8px rgba(16,42,67,.10);
+  }
+
+  /* 界面标签 */
+  .label-3d-interface{
+    border-color: rgba(47,143,214,.5);
+    background: rgba(255,255,255,.94);
+  }
+  .label-3d-interface small{
+    color: #2f8fd6;
+    font-weight: 600;
+  }
+
+  .info-card{
+    min-height:0;overflow-y:auto;padding:16px 22px 18px;
+    scrollbar-width:thin;
+  }
+  .info-card::-webkit-scrollbar{width:6px;}
+  .info-card::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:3px;}
+
+  .info-head{
+    display:flex;gap:11px;align-items:flex-start;
+    padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--line-2);
+  }
+  .swatch{
+    width:14px;height:14px;border-radius:4px;background:var(--c);
+    flex:none;margin-top:4px;box-shadow:0 0 0 3px rgba(47,143,214,.10);
+  }
+  .info-head h2{font-size:18px;font-weight:800;color:var(--deep);margin-bottom:2px;}
+  .info-head .en{font-size:11px;color:var(--muted);}
+
+  .stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
+    gap:7px;margin-bottom:12px;
+  }
+  .stat{background:#f6f9fd;border:1px solid #e6eef7;border-radius:9px;padding:7px 9px;}
+  .stat span{display:block;font-size:10px;color:#8a9caf;margin-bottom:3px;}
+  .stat strong{font-size:12px;font-weight:700;color:#22405c;}
+
+  .desc{
+    font-size:12.5px;line-height:1.82;color:#3a5064;
+    background:#f2f8ff;border-left:3px solid #7dc4f2;
+    border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:11px;
+    text-indent:2em;
+  }
+  .points{list-style:none;display:flex;flex-direction:column;gap:6px;}
+  .points li{
+    position:relative;padding-left:17px;
+    font-size:12px;line-height:1.68;color:#4a6076;
+  }
+  .points li::before{
+    content:"";position:absolute;left:4px;top:7px;
+    width:5px;height:5px;border-radius:50%;background:#4fb4f0;
+  }
+
+  @media (max-width:860px){
+    .app{padding:8px 10px;gap:7px;}
+    .workspace{grid-template-columns:1fr;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr);}
+    .hero .sub{display:none;}
+    .info-card{padding:12px 14px 14px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="hero">
+    <h1>地球内部结构剖面图 · 3D</h1>
+    <span class="sub">拖拽旋转 · 滚轮缩放 · 点击圈层查看详情</span>
+  </header>
+
+  <div class="workspace">
+
+    <section class="card diagram-card">
+      <div class="tabs">
+        <button class="tab active" data-mode="physical">物理结构</button>
+        <button class="tab" data-mode="chemical">化学组成</button>
+      </div>
+      <div class="mode-desc" id="modeDesc"></div>
+      <div id="canvas-wrap">
+        <div id="loading">正在加载 3D 地球…</div>
+      </div>
+    </section>
+
+    <aside class="card info-card" id="info"></aside>
+
+  </div>
+
+</div>
+
+<!-- ==================== importmap ==================== -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+  }
+}
+</script>
+
+<!-- ==================== 主脚本 ==================== -->
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* ==================== 数据 ==================== */
+const MODES = {
+  physical: {
+    desc: '按物质的物理状态（固态 / 液态）与力学性质（刚性 / 塑性）划分',
+    layers: [
+      {
+        id:'litho', name:'岩石圈', en:'Lithosphere',
+        tagline:'坚硬的“外壳”，板块的本体',
+        rOuter:1, rInner:0.855, color:'#4E7A8A',
+        stats:[['深度范围','0 – 约 100 km'],['物质状态','固态 · 刚性'],['温度','约 0 – 1300 ℃'],['密度','2.7 – 3.4 g/cm³']],
+        desc:'岩石圈是地球最外层坚硬的岩石层，由地壳和上地幔顶部共同组成。它并不是完整的一块，而是被断裂带切割成许多巨大的块体——这就是我们熟悉的“板块”。',
+        points:['组成：地壳 + 上地幔顶部（以橄榄岩为主）','厚度不均：大洋区约 50–100 km，大陆区可达 200 km','板块构造运动的主体，地震与火山大多发生在这里','它与软流圈之间是逐渐过渡的，没有一条明确的界线']
+      },
+      {
+        id:'astheno', name:'软流圈', en:'Asthenosphere',
+        tagline:'可以缓慢流动的“软层”',
+        rOuter:0.855, rInner:0.72, color:'#C99A3C',
+        stats:[['深度范围','约 100 – 400 km'],['物质状态','部分熔融 · 塑性'],['温度','约 1300 – 1600 ℃'],['密度','3.3 – 3.6 g/cm³']],
+        desc:'软流圈位于岩石圈之下，这里物质接近熔点，约有 1%–5% 处于熔融状态，整体像沥青一样可以极缓慢地流动。地震波在此处速度明显下降，因此也被称为“低速层”。',
+        points:['岩浆的主要发源地，火山喷发的物质多来自这里','岩石圈板块“漂浮”在软流圈之上并发生水平运动','地热梯度高，是地球内部热量向外传递的重要通道','地震波（尤其是横波）在这里传播速度明显降低']
+      },
+      {
+        id:'meso', name:'中间圈', en:'Mesosphere',
+        tagline:'地球内部体积最大的固体圈层',
+        rOuter:0.72, rInner:0.48, color:'#B85C38',
+        stats:[['深度范围','约 400 – 2900 km'],['物质状态','固态（高温高压）'],['温度','约 1600 – 3000 ℃'],['密度','3.9 – 5.6 g/cm³']],
+        desc:'中间圈（又称中圈）位于软流圈之下、地核之上，大致相当于下地幔。这里压力极大，物质虽然温度很高，却依然保持固态，并在漫长地质年代中发生缓慢的对流。',
+        points:['约占地球体积的一半以上，是地球内部最“厚实”的部分','主要由富镁铁硅酸盐矿物组成，高压下形成致密的钙钛矿结构','地幔对流是驱动板块运动、火山与地震的深部动力','底部与地核交界处存在 D″ 层，是地幔与地核物质交换的界面']
+      },
+      {
+        id:'outercore', name:'外核', en:'Outer Core',
+        tagline:'产生地球磁场的液态金属层',
+        rOuter:0.48, rInner:0.20, color:'#F0A202',
+        stats:[['深度范围','约 2900 – 5150 km'],['物质状态','液态'],['温度','约 4000 – 5000 ℃'],['密度','9.9 – 12.2 g/cm³']],
+        desc:'外核由熔融的铁、镍等金属组成。由于是液态，横波无法通过——这正是科学家判断外核为液态的关键证据。液态金属的对流与地球自转共同作用，产生了保护地球的磁场。',
+        points:['成分：以铁、镍为主，含少量硫、硅、氧等轻元素','横波（S 波）不能通过外核，纵波（P 波）可以','“地磁发电机”：液态铁的对流产生地球磁场','磁场为我们阻挡太阳风，是地球生命的“保护伞”']
+      },
+      {
+        id:'innercore', name:'内核', en:'Inner Core',
+        tagline:'高温高压下的固态铁球',
+        rOuter:0.20, rInner:0, color:'#FFE08A',
+        stats:[['深度范围','约 5150 – 6371 km'],['物质状态','固态'],['温度','约 5000 – 6000 ℃'],['压力','约 330 – 360 GPa'],['密度','12.8 – 13.1 g/cm³']],
+        desc:'内核的温度和太阳表面差不多，但由于承受着约 360 万个大气压的巨大压力，铁镍合金依然保持固态。它就像一颗悬浮在液态外核之中的“铁球”。',
+        points:['主要由铁镍合金组成，是地球上密度最大的部分','虽然温度极高，但超高压使铁保持固态','地震波通过内核时速度明显加快，说明它是固体','有研究认为内核的自转与地幔略有差异，可能存在“超速”或“滞后”']
+      }
+    ]
+  },
+  chemical: {
+    desc: '按物质的化学成分与矿物组成划分',
+    layers: [
+      {
+        id:'crust', name:'地壳', en:'Crust',
+        tagline:'薄薄的一层“岩石外壳”',
+        rOuter:1, rInner:0.94, color:'#8A7561',
+        stats:[['深度范围','0 – 平均约 17 km'],['大陆地壳','约 33 km（最厚可达 70 km）'],['大洋地壳','约 5 – 10 km'],['密度','2.7 – 3.0 g/cm³']],
+        desc:'地壳是地球最外部的固体薄壳。相对于 6371 千米的地球半径，它就像苹果皮一样薄。地壳分为大陆地壳和大洋地壳，两者在厚度和成分上差别很大。',
+        points:['主要元素：氧（约46.6%）、硅（约27.7%）、铝（约8.1%）、铁（约5.0%）','上部为“硅铝层”（花岗质，大陆区发育），下部为“硅镁层”（玄武质，全球连续）','地壳与地幔的分界面叫“莫霍面”，由南斯拉夫地震学家莫霍洛维契奇发现','人类目前最深的钻井（科拉超深井）也只有约 12.3 km，尚未穿透大陆地壳']
+      },
+      {
+        id:'mantle', name:'地幔', en:'Mantle',
+        tagline:'地球体积最大的圈层',
+        rOuter:0.94, rInner:0.48, color:'#B85C38',
+        stats:[['深度范围','约 17 – 2900 km'],['占地球体积','约 82%'],['占地球质量','约 67%'],['密度','3.3 – 5.6 g/cm³']],
+        desc:'地幔位于地壳与地核之间，是地球内部体积和质量最大的圈层。它主要由富含镁、铁的硅酸盐矿物（如橄榄石、辉石）组成，上部和下部在物理性质上有明显差别。',
+        points:['上地幔（约 17 – 670 km）：包含软流圈，是岩浆的重要来源','下地幔（约 670 – 2900 km）：高压下矿物结构发生转变，更加致密','地幔与地核的分界面叫“古登堡面”，深度约 2900 km','地幔物质的对流是板块运动、火山与地震的根本动力']
+      },
+      {
+        id:'core', name:'地核', en:'Core',
+        tagline:'铁镍组成的“金属球”',
+        rOuter:0.48, rInner:0, color:'#F0A202',
+        stats:[['深度范围','约 2900 – 6371 km'],['半径','约 3471 km'],['占地球质量','约 31%'],['密度','9.9 – 13.1 g/cm³']],
+        desc:'地核是地球的中心部分，半径约 3471 千米，比火星的半径还要大。它主要由铁和镍组成，分为液态的外核和固态的内核两部分。',
+        points:['主要成分：铁（约85%）、镍（约5%），以及硫、硅、氧等轻元素','外核为液态，内核为固态，两者的分界面深度约 5150 km','地核温度可达 5000–6000 ℃，与太阳表面温度相当','液态外核的对流产生了地球磁场，保护地球免受太阳风侵袭']
+      }
+    ]
+  }
+};
+
+/* ==================== 状态 ==================== */
+let currentMode = 'physical';
+let currentId = MODES.physical.layers[0].id;
+let scene, camera, renderer, labelRenderer, controls;
+let layerMeshes = [];
+let ringMeshes = [];
+let labelObjects = [];
+let interfaceLines = [];
+let raycaster, mouse;
+
+const BASE_RADIUS = 1.5;
+const PHI_START = Math.PI * 1.10;
+const PHI_LENGTH = Math.PI * 1.55;
+
+/* ==================== 初始化 Three.js ==================== */
+function initThree(){
+  const wrap = document.getElementById('canvas-wrap');
+  const W = wrap.clientWidth || 800;
+  const H = wrap.clientHeight || 600;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color('#f7fbff');
+
+  camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 1000);
+  camera.position.set(3.4, 2.2, 4.0);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  wrap.appendChild(renderer.domElement);
+
+  labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(W, H);
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0';
+  labelRenderer.domElement.style.left = '0';
+  labelRenderer.domElement.style.pointerEvents = 'none';
+  wrap.appendChild(labelRenderer.domElement);
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.rotateSpeed = 0.9;
+  controls.zoomSpeed = 0.9;
+  controls.minDistance = 2.6;
+  controls.maxDistance = 8.0;
+  controls.enablePan = false;
+  controls.autoRotate = false;    // 已关闭自动旋转
+  controls.target.set(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.6));
+
+  const dir1 = new THREE.DirectionalLight(0xffffff, 2.0);
+  dir1.position.set(5, 6, 4);
+  scene.add(dir1);
+
+  const dir2 = new THREE.DirectionalLight(0x88bbff, 1.0);
+  dir2.position.set(-4, -3, -5);
+  scene.add(dir2);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  renderer.domElement.addEventListener('click', onCanvasClick);
+  window.addEventListener('resize', onResize);
+
+  animate();
+  document.getElementById('loading').classList.add('hide');
+}
+
+/* ==================== 关键界面定义（角度自动均匀分配） ==================== */
+function getInterfaces(mode){
+  let defs;
+  if (mode === 'physical'){
+    defs = [
+      { name: '地表',       info: '0 km',      r: 1.0 },
+      { name: '岩石圈底部', info: '约 100 km',  r: 0.855 },
+      { name: '软流圈底部', info: '约 400 km',  r: 0.72 },
+      { name: '古登堡面',   info: '约 2900 km', r: 0.48 },
+      { name: '内外核分界', info: '约 5150 km', r: 0.20 }
+    ];
+  } else {
+    defs = [
+      { name: '地表',       info: '0 km',      r: 1.0 },
+      { name: '莫霍面',     info: '约 17 km',   r: 0.94 },
+      { name: '古登堡面',   info: '约 2900 km', r: 0.48 },
+      { name: '内外核分界', info: '约 5150 km', r: 0.20 }
+    ];
+  }
+
+  const startAngle = 15;
+  const endAngle = 85;
+  const step = (endAngle - startAngle) / (defs.length - 1);
+
+  return defs.map((d, i) => ({
+    ...d,
+    angle: startAngle + step * i
+  }));
+}
+
+/* ==================== 构建 3D 地球 ==================== */
+function buildGlobe(mode){
+  // 清空旧的圈层
+  layerMeshes.forEach(item => {
+    scene.remove(item.mesh);
+    item.mesh.geometry.dispose();
+    item.mesh.material.dispose();
+  });
+  layerMeshes = [];
+
+  // 清空旧的切面轮廓环
+  ringMeshes.forEach(r => {
+    scene.remove(r);
+    r.geometry.dispose();
+    r.material.dispose();
+  });
+  ringMeshes = [];
+
+  // 清空旧的标签 / 引线 / 圆点（labelObjects 里混有 DOM 元素、Line、Mesh）
+  labelObjects.forEach(obj => {
+    if (obj.element && obj.element.parentNode) obj.element.parentNode.removeChild(obj.element);
+    scene.remove(obj);
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material.dispose();
+    }
+  });
+  labelObjects = [];
+
+  // 清空旧的界面标注
+  interfaceLines.forEach(obj => {
+    if (obj.element && obj.element.parentNode) obj.element.parentNode.removeChild(obj.element);
+    scene.remove(obj);
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material.dispose();
+    }
+  });
+  interfaceLines = [];
+
+  const layers = MODES[mode].layers;
+
+  layers.forEach(layer => {
+    const rOuter = layer.rOuter * BASE_RADIUS;
+    const geometry = new THREE.SphereGeometry(
+      rOuter, 64, 48,
+      PHI_START, PHI_LENGTH,
+      0, Math.PI
+    );
+
+    const color = new THREE.Color(layer.color);
+    const material = new THREE.MeshStandardMaterial({
+      color: color,
+      roughness: 0.62,
+      metalness: 0.08,
+      emissive: color.clone().multiplyScalar(0.12),
+      side: THREE.DoubleSide
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.userData = { id: layer.id, layer: layer, baseColor: color.clone() };
+    scene.add(mesh);
+    layerMeshes.push({ id: layer.id, mesh: mesh, layer: layer });
+
+    // 切面轮廓环
+    const ringGeo = new THREE.TorusGeometry(rOuter, 0.006, 8, 80, PHI_LENGTH);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.55
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.rotation.z = PHI_START;
+    scene.add(ring);
+    ringMeshes.push(ring);
+  });
+
+  // 地心标签（外移 + 引线）
+  addLabels(layers);
+
+  // 关键界面标注（带引线）
+  addInterfaceLabels(mode);
+
+  updateHighlight();
+}
+
+/* ==================== 地心标签（带引线，放在球体外） ==================== */
+function addLabels(layers){
+  const LABEL_RADIUS = BASE_RADIUS * 1.20;
+  const angle = (95 * Math.PI) / 180;   // 与界面标签错开角度
+  const xLb = Math.cos(angle) * LABEL_RADIUS;
+  const yLb = Math.sin(angle) * LABEL_RADIUS;
+
+  /* --- 引线：球心 → 标签 --- */
+  const pts = [
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(xLb, yLb, 0)
+  ];
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat = new THREE.LineDashedMaterial({
+    color: 0xe8890c,
+    dashSize: 0.045,
+    gapSize: 0.035,
+    transparent: true,
+    opacity: 0.8
+  });
+  const line = new THREE.Line(geo, mat);
+  line.computeLineDistances();
+  scene.add(line);
+  labelObjects.push(line);
+
+  /* --- 球心处的小圆点（保留，表示地心位置） --- */
+  const dotGeo = new THREE.SphereGeometry(0.035, 12, 12);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0xe8890c });
+  const dot = new THREE.Mesh(dotGeo, dotMat);
+  dot.position.set(0, 0, 0);
+  scene.add(dot);
+  labelObjects.push(dot);
+
+  /* --- 标签 --- */
+  const centerDiv = document.createElement('div');
+  centerDiv.className = 'label-3d label-3d-center';
+  centerDiv.innerHTML = `
+    地心 · 6371 km
+    <small>约 5000–6000 ℃</small>
+    <small>约 330–360 GPa</small>
+  `;
+  const centerLabel = new CSS2DObject(centerDiv);
+  centerLabel.position.set(xLb, yLb, 0);
+  scene.add(centerLabel);
+  labelObjects.push(centerLabel);
+}
+
+/* ==================== 关键界面标注（带引线） ==================== */
+function addInterfaceLabels(mode){
+  const interfaces = getInterfaces(mode);
+  const LABEL_RADIUS = BASE_RADIUS * 1.18;
+
+  interfaces.forEach(iface => {
+    const angle = (iface.angle * Math.PI) / 210;
+    const rInterface = iface.r * BASE_RADIUS;
+
+    const xIf = Math.cos(angle) * rInterface;
+    const yIf = Math.sin(angle) * rInterface;
+    const xLb = Math.cos(angle) * LABEL_RADIUS;
+    const yLb = Math.sin(angle) * LABEL_RADIUS;
+
+    /* --- 引线：球心 → 界面点 → 标签点 --- */
+    const pts = [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(xIf, yIf, 0),
+      new THREE.Vector3(xLb, yLb, 0)
+    ];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineDashedMaterial({
+      color: 0x2f8fd6,
+      dashSize: 0.045,
+      gapSize: 0.035,
+      transparent: true,
+      opacity: 0.7
+    });
+    const line = new THREE.Line(geo, mat);
+    line.computeLineDistances();
+    scene.add(line);
+    interfaceLines.push(line);
+
+    /* --- 界面处的小圆点 --- */
+    const dotGeo = new THREE.SphereGeometry(0.028, 10, 10);
+    const dotMat = new THREE.MeshBasicMaterial({ color: 0x2f8fd6 });
+    const dot = new THREE.Mesh(dotGeo, dotMat);
+    dot.position.set(xIf, yIf, 0);
+    scene.add(dot);
+    interfaceLines.push(dot);
+
+    /* --- 标签 --- */
+    const div = document.createElement('div');
+    div.className = 'label-3d label-3d-interface';
+    div.innerHTML = `${iface.name}<small>${iface.info}</small>`;
+    const label = new CSS2DObject(div);
+    label.position.set(xLb, yLb, 0);
+    scene.add(label);
+    interfaceLines.push(label);
+  });
+}
+
+/* ==================== 高亮 ==================== */
+function updateHighlight(){
+  layerMeshes.forEach(item => {
+    const isSelected = item.id === currentId;
+    const mat = item.mesh.material;
+    if (isSelected) {
+      mat.emissive = item.mesh.userData.baseColor.clone().multiplyScalar(0.55);
+      mat.roughness = 0.45;
+    } else {
+      mat.emissive = item.mesh.userData.baseColor.clone().multiplyScalar(0.10);
+      mat.roughness = 0.62;
+    }
+    mat.needsUpdate = true;
+  });
+}
+
+/* ==================== 点击拾取 ==================== */
+function onCanvasClick(event){
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = layerMeshes.map(item => item.mesh);
+  const intersects = raycaster.intersectObjects(meshes, false);
+
+  for (const hit of intersects) {
+    if (hit.object.userData && hit.object.userData.id) {
+      selectLayer(hit.object.userData.id);
+      break;
+    }
+  }
+}
+
+/* ==================== 渲染循环 ==================== */
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+
+/* ==================== 自适应 ==================== */
+function onResize(){
+  const wrap = document.getElementById('canvas-wrap');
+  if (!wrap || !renderer) return;
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  if (W === 0 || H === 0) return;
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W, H);
+  labelRenderer.setSize(W, H);
+}
+
+/* ==================== 右侧详情 ==================== */
+function renderInfo(){
+  const layers = MODES[currentMode].layers;
+  const layer = layers.find(l => l.id === currentId) || layers[0];
+  const box = document.getElementById('info');
+
+  box.innerHTML = `
+    <div class="info-head" style="--c:${layer.color}">
+      <span class="swatch"></span>
+      <div>
+        <h2>${layer.name}</h2>
+        <p class="en">${layer.en} · ${layer.tagline}</p>
+      </div>
+    </div>
+    <div class="stats">
+      ${layer.stats.map(([k,v]) =>
+        `<div class="stat"><span>${k}</span><strong>${v}</strong></div>`
+      ).join('')}
+    </div>
+    <p class="desc">${layer.desc}</p>
+    <ul class="points">
+      ${layer.points.map(p => `<li>${p}</li>`).join('')}
+    </ul>
+  `;
+}
+
+/* ==================== 选择圈层 ==================== */
+function selectLayer(id){
+  currentId = id;
+  updateHighlight();
+  renderInfo();
+}
+
+/* ==================== 切换模式 ==================== */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.mode === currentMode) return;
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    currentMode = btn.dataset.mode;
+    currentId = MODES[currentMode].layers[0].id;
+
+    document.getElementById('modeDesc').textContent = MODES[currentMode].desc;
+    buildGlobe(currentMode);
+    renderInfo();
+  });
+});
+
+/* ==================== 启动 ==================== */
+document.getElementById('modeDesc').textContent = MODES[currentMode].desc;
+
+window.addEventListener('load', () => {
+  initThree();
+  buildGlobe(currentMode);
+  renderInfo();
+  setTimeout(onResize, 120);
+});
+
+window.addEventListener('resize', onResize);
+</script>
+</body>
+</html>

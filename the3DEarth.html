@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts 3D 地球结构图（修正版）</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.0/dist/echarts-gl.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #000; overflow: hidden; }
+        #chart-container { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="chart-container"></div>
+    <script>
+        (function() {
+            const chart = echarts.init(document.getElementById('chart-container'));
+
+            // 请确认这个文件真实存在于同目录下的 images/planets/ 文件夹中
+            const earthTexture = 'images/planets/earth_atmos_2048.jpg';
+
+            const option = {
+                backgroundColor: '#000',
+
+                // ✅ globe 是顶层组件，和 series 平级
+                globe: {
+                    baseTexture: earthTexture,
+                    heightTexture: earthTexture,
+                    displacementScale: 0.05,
+                    shading: 'lambert',           // 先用简单着色，确保能渲染
+                    environment: '#000',
+
+                    light: {
+                        ambient: { intensity: 0.8 },
+                        main: {
+                            intensity: 1.2,
+                            alpha: 40,
+                            beta: 30
+                        }
+                    },
+
+                    viewControl: {
+                        autoRotate: true,
+                        autoRotateSpeed: 10,
+                        distance: 250,
+                        alpha: 30,
+                        beta: 0
+                    }
+                },
+
+                // series 可以留空，globe 本身就是一个独立组件
+                series: []
+            };
+
+            chart.setOption(option);
+            window.addEventListener('resize', function() { chart.resize(); });
+        })();
+    </script>
+</body>
+</html>
