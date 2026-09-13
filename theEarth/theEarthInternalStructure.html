@@ -53,6 +53,17 @@
     display:flex;flex-direction:column;min-height:0;
     padding:10px 12px 8px;position:relative;
   }
+  .notice-bar{
+    font-size:12px;
+    color:#2f8fd6;
+    text-align:center;
+    padding:6px 10px;
+    line-height:1.6;
+    background:#f4faff;
+    border:1px solid #cde6f7;
+    border-radius:10px;
+    margin-bottom:8px;
+  }
   .tabs{
     flex:none;display:flex;gap:6px;background:#f2f6fb;
     border:1px solid var(--line);border-radius:11px;padding:4px;
@@ -77,14 +88,12 @@
     border-radius:12px;overflow:hidden;background:#f7fbff;
   }
   #canvas-wrap canvas{display:block;width:100%;height:100%;}
-
   #loading{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:#f7fbff;color:var(--muted);font-size:13px;z-index:5;
     transition:opacity .4s;
   }
   #loading.hide{opacity:0;pointer-events:none;}
-
   .label-3d{
     font-size:11px;font-weight:600;color:#0d3b60;
     background:rgba(255,255,255,.88);
@@ -94,13 +103,11 @@
     box-shadow:0 2px 8px rgba(16,42,67,.08);
   }
   .label-3d small{display:block;font-weight:400;font-size:9.5px;color:#5b748c;line-height:1.4;}
-
   /* 地心标签稍微强调 */
   .label-3d-center{
     border-color: rgba(232,137,12,.55);
     box-shadow:0 0 0 3px rgba(240,162,2,.10), 0 2px 8px rgba(16,42,67,.10);
   }
-
   /* 界面标签 */
   .label-3d-interface{
     border-color: rgba(47,143,214,.5);
@@ -110,14 +117,12 @@
     color: #2f8fd6;
     font-weight: 600;
   }
-
   .info-card{
     min-height:0;overflow-y:auto;padding:16px 22px 18px;
     scrollbar-width:thin;
   }
   .info-card::-webkit-scrollbar{width:6px;}
   .info-card::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:3px;}
-
   .info-head{
     display:flex;gap:11px;align-items:flex-start;
     padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--line-2);
@@ -128,7 +133,6 @@
   }
   .info-head h2{font-size:18px;font-weight:800;color:var(--deep);margin-bottom:2px;}
   .info-head .en{font-size:11px;color:var(--muted);}
-
   .stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
     gap:7px;margin-bottom:12px;
@@ -136,7 +140,6 @@
   .stat{background:#f6f9fd;border:1px solid #e6eef7;border-radius:9px;padding:7px 9px;}
   .stat span{display:block;font-size:10px;color:#8a9caf;margin-bottom:3px;}
   .stat strong{font-size:12px;font-weight:700;color:#22405c;}
-
   .desc{
     font-size:12.5px;line-height:1.82;color:#3a5064;
     background:#f2f8ff;border-left:3px solid #7dc4f2;
@@ -152,42 +155,35 @@
     content:"";position:absolute;left:4px;top:7px;
     width:5px;height:5px;border-radius:50%;background:#4fb4f0;
   }
-
   @media (max-width:860px){
     .app{padding:8px 10px;gap:7px;}
     .workspace{grid-template-columns:1fr;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr);}
     .hero .sub{display:none;}
     .info-card{padding:12px 14px 14px;}
+    .notice-bar{font-size:11px;}
   }
 </style>
 </head>
 <body>
 <div class="app">
-
   <header class="hero">
     <h1>地球内部结构剖面图 · 3D</h1>
     <span class="sub">拖拽旋转 · 滚轮缩放 · 点击圈层查看详情</span>
   </header>
-
   <div class="workspace">
-
     <section class="card diagram-card">
       <div class="tabs">
-        <button class="tab active" data-mode="physical">物理结构</button>
-        <button class="tab" data-mode="chemical">化学组成</button>
+        <button class="tab active" data-mode="physical">流变学分层</button>
+        <button class="tab" data-mode="chemical">化学组成分层</button>
       </div>
       <div class="mode-desc" id="modeDesc"></div>
       <div id="canvas-wrap">
         <div id="loading">正在加载 3D 地球…</div>
       </div>
     </section>
-
     <aside class="card info-card" id="info"></aside>
-
   </div>
-
 </div>
-
 <!-- ==================== importmap ==================== -->
 <script type="importmap">
 {
@@ -197,91 +193,88 @@
   }
 }
 </script>
-
 <!-- ==================== 主脚本 ==================== -->
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
-/* ==================== 数据 ==================== */
+/* ==================== 数据 专业修订版 ==================== */
 const MODES = {
   physical: {
-    desc: '按物质的物理状态（固态 / 液态）与力学性质（刚性 / 塑性）划分',
+    desc: '流变学分层：按照地球物质流变力学性质划分，判据为刚性、塑性流动、部分熔融/液态物态；同一化学圈层内部可以存在多种流变状态。',
     layers: [
       {
         id:'litho', name:'岩石圈', en:'Lithosphere',
-        tagline:'坚硬的“外壳”，板块的本体',
+        tagline:'刚性岩石外壳，板块构造的载体',
         rOuter:1, rInner:0.855, color:'#4E7A8A',
-        stats:[['深度范围','0 – 约 100 km'],['物质状态','固态 · 刚性'],['温度','约 0 – 1300 ℃'],['密度','2.7 – 3.4 g/cm³']],
-        desc:'岩石圈是地球最外层坚硬的岩石层，由地壳和上地幔顶部共同组成。它并不是完整的一块，而是被断裂带切割成许多巨大的块体——这就是我们熟悉的“板块”。',
-        points:['组成：地壳 + 上地幔顶部（以橄榄岩为主）','厚度不均：大洋区约 50–100 km，大陆区可达 200 km','板块构造运动的主体，地震与火山大多发生在这里','它与软流圈之间是逐渐过渡的，没有一条明确的界线']
+        stats:[['深度范围','0 – 约 100 km（参考底界）'],['物质状态','固态 · 刚性'],['温度','约 0 – 1300 ℃'],['密度','2.7 – 3.4 g/cm³']],
+        desc:'岩石圈是地球最外层刚性岩石圈层，完整包含全部地壳以及上地幔顶部的刚性部分。岩石圈不存在全球统一的底界深度：大洋岩石圈约50‑100 km，古老大陆克拉通岩石圈最厚可达200 km；100 km为大陆区域常用参考深度。岩石圈被断裂分割成若干岩石板块，板块构造运动就发生在该圈层。',
+        points:['组成：全部地壳 + 上地幔顶部刚性橄榄岩','底界为过渡带，无全球统一硬边界；古老克拉通厚度可达200 km','是板块构造的本体，绝大多数浅源地震、火山作用与之相关','下伏界面为软流圈，二者为力学过渡关系，并非突变地质界面']
       },
       {
         id:'astheno', name:'软流圈', en:'Asthenosphere',
-        tagline:'可以缓慢流动的“软层”',
+        tagline:'上地幔内可发生塑性流动的层位，板块运动的深部润滑层',
         rOuter:0.855, rInner:0.72, color:'#C99A3C',
-        stats:[['深度范围','约 100 – 400 km'],['物质状态','部分熔融 · 塑性'],['温度','约 1300 – 1600 ℃'],['密度','3.3 – 3.6 g/cm³']],
-        desc:'软流圈位于岩石圈之下，这里物质接近熔点，约有 1%–5% 处于熔融状态，整体像沥青一样可以极缓慢地流动。地震波在此处速度明显下降，因此也被称为“低速层”。',
-        points:['岩浆的主要发源地，火山喷发的物质多来自这里','岩石圈板块“漂浮”在软流圈之上并发生水平运动','地热梯度高，是地球内部热量向外传递的重要通道','地震波（尤其是横波）在这里传播速度明显降低']
+        stats:[['深度范围','约 100 – 400 km（参考区间）'],['物质状态','部分熔融 · 塑性流变'],['温度','约 1300 – 1600 ℃'],['密度','3.3 – 3.6 g/cm³']],
+        desc:'软流圈位于岩石圈之下的上地幔内部，地震波速在此显著降低，又称低速带。该层仅有1%‑5%矿物发生局部熔融，整体为固态岩石，但在地质时间尺度下可以发生缓慢塑性流动。需要注意：410 km是橄榄石向瓦兹利石转变的矿物相变面，并不等同于软流圈的终止边界；在古老大陆克拉通之下，软流圈甚至可以不发育。',
+        points:['是岩浆的重要源区，多数玄武质岩浆起源于此','上覆岩石圈板块“漂浮”其上，为板块水平运动提供流变条件','仅局部发生部分熔融，不是整体熔融的岩浆海洋','410 km属于矿物相变不连续面，不等同软流圈力学边界']
       },
       {
-        id:'meso', name:'中间圈', en:'Mesosphere',
-        tagline:'地球内部体积最大的固体圈层',
+        id:'meso', name:'中间圈（地幔力学中间层）', en:'Mantle‑Mesosphere',
+        tagline:'下地幔，高温高压条件下的致密固态圈层，⚠勿与大气中间层混淆',
         rOuter:0.72, rInner:0.48, color:'#B85C38',
-        stats:[['深度范围','约 400 – 2900 km'],['物质状态','固态（高温高压）'],['温度','约 1600 – 3000 ℃'],['密度','3.9 – 5.6 g/cm³']],
-        desc:'中间圈（又称中圈）位于软流圈之下、地核之上，大致相当于下地幔。这里压力极大，物质虽然温度很高，却依然保持固态，并在漫长地质年代中发生缓慢的对流。',
-        points:['约占地球体积的一半以上，是地球内部最“厚实”的部分','主要由富镁铁硅酸盐矿物组成，高压下形成致密的钙钛矿结构','地幔对流是驱动板块运动、火山与地震的深部动力','底部与地核交界处存在 D″ 层，是地幔与地核物质交换的界面']
+        stats:[['深度范围','约 660 – 2900 km（下地幔）'],['物质状态','固态（极端高温高压）'],['温度','约 1600 – 3000 ℃'],['密度','3.9 – 5.6 g/cm³']],
+        desc:'流变学定义的地幔力学中间圈，对应完整下地幔，上边界为660 km矿物相变不连续面，下边界为古登堡不连续面（地幔‑地核分界面）。尽管圈层内部温度极高，但巨大围压使得全部矿物保持固态；在百万年级地质时间尺度下发生缓慢地幔对流。地幔最底部200‑300km厚度区域称为D″层，是地幔与外核物质、能量交换的关键边界层。',
+        points:['上界660 km为地幔最重要的矿物相变界面，分隔上地幔过渡带与下地幔','主要由富镁铁硅酸盐高压矿物（钙钛矿相）组成，矿物结构致密','地幔对流的主体，驱动表层板块构造、火山与地震活动','底部D″层：核幔边界复杂过渡层，存在横向成分与温度异常']
       },
       {
         id:'outercore', name:'外核', en:'Outer Core',
-        tagline:'产生地球磁场的液态金属层',
+        tagline:'液态铁镍金属层，地球地磁发电机发生层',
         rOuter:0.48, rInner:0.20, color:'#F0A202',
-        stats:[['深度范围','约 2900 – 5150 km'],['物质状态','液态'],['温度','约 4000 – 5000 ℃'],['密度','9.9 – 12.2 g/cm³']],
-        desc:'外核由熔融的铁、镍等金属组成。由于是液态，横波无法通过——这正是科学家判断外核为液态的关键证据。液态金属的对流与地球自转共同作用，产生了保护地球的磁场。',
-        points:['成分：以铁、镍为主，含少量硫、硅、氧等轻元素','横波（S 波）不能通过外核，纵波（P 波）可以','“地磁发电机”：液态铁的对流产生地球磁场','磁场为我们阻挡太阳风，是地球生命的“保护伞”']
+        stats:[['深度范围','约 2900 – 5150 km'],['物质状态','液态铁镍合金'],['温度','约 4000 – 5000 ℃'],['密度','9.9 – 12.2 g/cm³']],
+        desc:'外核的上边界为古登堡不连续面（2900 km），下边界为莱曼不连续面（内外核分界面，5150 km）。主要由熔融的铁‑镍金属构成，混有少量硫、硅、氧等轻元素。地震横波S波完全不能穿过外核，这是判定外核为液态的直接地震学证据；液态金属对流叠加地球自转，构成地磁发电机，生成全球性地磁场。',
+        points:['成分：铁镍为主，含硫、硅、氧等轻元素','横波S波无法传播，纵波P波可穿过该层','“地磁发电机”：液态金属对流产生地球主磁场','地磁场屏蔽太阳风高能粒子，是地表生命的重要屏障']
       },
       {
         id:'innercore', name:'内核', en:'Inner Core',
-        tagline:'高温高压下的固态铁球',
+        tagline:'超高压下固态铁镍球体，地球最中心圈层',
         rOuter:0.20, rInner:0, color:'#FFE08A',
-        stats:[['深度范围','约 5150 – 6371 km'],['物质状态','固态'],['温度','约 5000 – 6000 ℃'],['压力','约 330 – 360 GPa'],['密度','12.8 – 13.1 g/cm³']],
-        desc:'内核的温度和太阳表面差不多，但由于承受着约 360 万个大气压的巨大压力，铁镍合金依然保持固态。它就像一颗悬浮在液态外核之中的“铁球”。',
-        points:['主要由铁镍合金组成，是地球上密度最大的部分','虽然温度极高，但超高压使铁保持固态','地震波通过内核时速度明显加快，说明它是固体','有研究认为内核的自转与地幔略有差异，可能存在“超速”或“滞后”']
+        stats:[['深度范围','约 5150 – 6371 km'],['物质状态','固态铁镍合金'],['温度','约 5000 – 6000 ℃'],['压力','约 330 – 360 GPa'],['密度','12.8 – 13.1 g/cm³']],
+        desc:'内核上边界为莱曼不连续面（约5150 km），是地球最中心球体。内核温度接近太阳光球表面温度，但承受330‑360GPa的极端压力，铁镍合金维持固态。内核悬浮于液态外核内部；地震学观测显示内核地震波速显著高于外核，证实固态属性。现代部分研究提出内核相对地幔存在差速自转（超速或者滞后），该假说仍然存在学术争议，尚未形成定论。',
+        points:['主要成分为铁镍合金，是地球密度最高的圈层','极高温度条件下，依靠超高压保持固态','地震波穿透内核时波速明显升高，是判定固态的观测证据','内核差速自转属于前沿科研假说，尚未完全证实']
       }
     ]
   },
   chemical: {
-    desc: '按物质的化学成分与矿物组成划分',
+    desc: '化学组成分层：依据岩石、矿物的化学元素与矿物组分差异划分；一级不连续面为莫霍洛维奇不连续面（莫霍面）、古登堡不连续面。',
     layers: [
       {
         id:'crust', name:'地壳', en:'Crust',
-        tagline:'薄薄的一层“岩石外壳”',
+        tagline:'地球最外部薄壳，3D图做视觉厚度放大，真实平均仅约17 km',
         rOuter:1, rInner:0.94, color:'#8A7561',
-        stats:[['深度范围','0 – 平均约 17 km'],['大陆地壳','约 33 km（最厚可达 70 km）'],['大洋地壳','约 5 – 10 km'],['密度','2.7 – 3.0 g/cm³']],
-        desc:'地壳是地球最外部的固体薄壳。相对于 6371 千米的地球半径，它就像苹果皮一样薄。地壳分为大陆地壳和大洋地壳，两者在厚度和成分上差别很大。',
-        points:['主要元素：氧（约46.6%）、硅（约27.7%）、铝（约8.1%）、铁（约5.0%）','上部为“硅铝层”（花岗质，大陆区发育），下部为“硅镁层”（玄武质，全球连续）','地壳与地幔的分界面叫“莫霍面”，由南斯拉夫地震学家莫霍洛维契奇发现','人类目前最深的钻井（科拉超深井）也只有约 12.3 km，尚未穿透大陆地壳']
+        stats:[['深度范围','0 – 平均约 17 km'],['大陆地壳','平均约33 km，造山带最厚可达 70 km'],['大洋地壳','约 5 – 10 km'],['密度','2.7 – 3.0 g/cm³']],
+        desc:'地壳是化学分层体系的最外层，以莫霍洛维奇不连续面（莫霍面）作为与地幔的分界面。大陆地壳与大洋地壳成分、厚度差异巨大：大陆地壳上部为硅铝质花岗质层；大洋地壳整体为硅镁质玄武岩，莫霍面之下直接过渡到上地幔橄榄岩。相对于6371 km地球半径，地壳如同苹果果皮一样极薄；人类最深科拉超深井12.262 m，尚未钻穿大陆地壳。',
+        points:['克拉克元素：氧~46.6%、硅~27.7%、铝~8.1%、铁~5.0%','大陆地壳：硅铝层（花岗质）+硅镁层；大洋地壳仅发育连续硅镁层','分界面：莫霍洛维奇不连续面（莫霍面），地震波速突变界面','科拉超深井最大深度12.262 km，未穿透大陆地壳']
       },
       {
         id:'mantle', name:'地幔', en:'Mantle',
-        tagline:'地球体积最大的圈层',
+        tagline:'地球体积、质量占比最大的硅酸盐圈层',
         rOuter:0.94, rInner:0.48, color:'#B85C38',
         stats:[['深度范围','约 17 – 2900 km'],['占地球体积','约 82%'],['占地球质量','约 67%'],['密度','3.3 – 5.6 g/cm³']],
-        desc:'地幔位于地壳与地核之间，是地球内部体积和质量最大的圈层。它主要由富含镁、铁的硅酸盐矿物（如橄榄石、辉石）组成，上部和下部在物理性质上有明显差别。',
-        points:['上地幔（约 17 – 670 km）：包含软流圈，是岩浆的重要来源','下地幔（约 670 – 2900 km）：高压下矿物结构发生转变，更加致密','地幔与地核的分界面叫“古登堡面”，深度约 2900 km','地幔物质的对流是板块运动、火山与地震的根本动力']
+        desc:'化学分层中的地幔，上起莫霍洛维奇不连续面，下至古登堡不连续面；整体由富镁、铁的硅酸盐矿物构成。内部依据矿物相变界面划分为：上地幔（17‑410 km）、上地幔过渡带（410‑660 km）、下地幔（660‑2900 km）。化学层面上地幔、下地幔总体成分接近，差异来自高压下矿物晶体结构转变；地幔内部的对流运动是板块构造、火山、地震的深部动力来源。',
+        points:['上地幔顶部刚性部分+全部地壳 = 流变学定义的岩石圈','410 km、660 km为地幔两级重要矿物相变不连续面','下地幔矿物以高压钙钛矿相为主，矿物晶体结构发生重大转变','底界古登堡不连续面：硅酸盐地幔向铁镍地核的化学突变界面']
       },
       {
         id:'core', name:'地核', en:'Core',
-        tagline:'铁镍组成的“金属球”',
+        tagline:'铁镍金属质核心，流变学上进一步划分为液态外核、固态内核',
         rOuter:0.48, rInner:0, color:'#F0A202',
-        stats:[['深度范围','约 2900 – 6371 km'],['半径','约 3471 km'],['占地球质量','约 31%'],['密度','9.9 – 13.1 g/cm³']],
-        desc:'地核是地球的中心部分，半径约 3471 千米，比火星的半径还要大。它主要由铁和镍组成，分为液态的外核和固态的内核两部分。',
-        points:['主要成分：铁（约85%）、镍（约5%），以及硫、硅、氧等轻元素','外核为液态，内核为固态，两者的分界面深度约 5150 km','地核温度可达 5000–6000 ℃，与太阳表面温度相当','液态外核的对流产生了地球磁场，保护地球免受太阳风侵袭']
+        stats:[['深度范围','约 2900 – 6371 km'],['等效半径','约 3471 km'],['占地球质量','约 31%'],['密度','9.9 – 13.1 g/cm³']],
+        desc:'化学分层定义的地核，上边界为古登堡不连续面；整体以铁‑镍金属为主要组分，混有硫、硅、氧等轻元素。从化学组分看，地核是一个统一圈层；从流变学（物理状态）进一步拆分为液态的外核与固态的内核，二者以莱曼不连续面（约5150 km）分界。地核温度可达5000‑6000 ℃；液态外核金属对流驱动地球主地磁场。',
+        points:['主要化学组分：铁约85%、镍约5%，其余为硫硅氧轻元素','化学上属于单一圈层；流变学分为液态外核、固态内核两部分','莱曼不连续面（~5150 km）：外核‑内核分界面','外核液态对流形成地磁发电机，生成地球主磁场']
       }
     ]
   }
 };
-
 /* ==================== 状态 ==================== */
 let currentMode = 'physical';
 let currentId = MODES.physical.layers[0].id;
@@ -291,29 +284,23 @@ let ringMeshes = [];
 let labelObjects = [];
 let interfaceLines = [];
 let raycaster, mouse;
-
 const BASE_RADIUS = 1.5;
 const PHI_START = Math.PI * 1.10;
 const PHI_LENGTH = Math.PI * 1.55;
-
 /* ==================== 初始化 Three.js ==================== */
 function initThree(){
   const wrap = document.getElementById('canvas-wrap');
   const W = wrap.clientWidth || 800;
   const H = wrap.clientHeight || 600;
-
   scene = new THREE.Scene();
   scene.background = new THREE.Color('#f7fbff');
-
   camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 1000);
   camera.position.set(3.4, 2.2, 4.0);
   camera.lookAt(0, 0, 0);
-
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(W, H);
   wrap.appendChild(renderer.domElement);
-
   labelRenderer = new CSS2DRenderer();
   labelRenderer.setSize(W, H);
   labelRenderer.domElement.style.position = 'absolute';
@@ -321,7 +308,6 @@ function initThree(){
   labelRenderer.domElement.style.left = '0';
   labelRenderer.domElement.style.pointerEvents = 'none';
   wrap.appendChild(labelRenderer.domElement);
-
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
@@ -330,59 +316,52 @@ function initThree(){
   controls.minDistance = 2.6;
   controls.maxDistance = 8.0;
   controls.enablePan = false;
-  controls.autoRotate = false;    // 已关闭自动旋转
+  controls.autoRotate = false;
   controls.target.set(0, 0, 0);
-
   scene.add(new THREE.AmbientLight(0xffffff, 1.6));
-
   const dir1 = new THREE.DirectionalLight(0xffffff, 2.0);
   dir1.position.set(5, 6, 4);
   scene.add(dir1);
-
   const dir2 = new THREE.DirectionalLight(0x88bbff, 1.0);
   dir2.position.set(-4, -3, -5);
   scene.add(dir2);
-
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
-
   renderer.domElement.addEventListener('click', onCanvasClick);
   window.addEventListener('resize', onResize);
-
   animate();
   document.getElementById('loading').classList.add('hide');
 }
-
-/* ==================== 关键界面定义（角度自动均匀分配） ==================== */
+/* ==================== 关键界面定义【专业修订不连续面】 ==================== */
 function getInterfaces(mode){
   let defs;
   if (mode === 'physical'){
+    // 流变学分层：地表、岩石圈参考底界、410km相变面、660km相变面、古登堡、莱曼
     defs = [
-      { name: '地表',       info: '0 km',      r: 1.0 },
-      { name: '岩石圈底部', info: '约 100 km',  r: 0.855 },
-      { name: '软流圈底部', info: '约 400 km',  r: 0.72 },
-      { name: '古登堡面',   info: '约 2900 km', r: 0.48 },
-      { name: '内外核分界', info: '约 5150 km', r: 0.20 }
+      { name: '地表',               info: '0 km',        r: 1.00 },
+      { name: '岩石圈参考底界',     info: '约 100 km',   r: 0.855 },
+      { name: '410km矿物相变面',    info: '410 km',      r: 0.780 },
+      { name: '660km矿物相变面',    info: '660 km',      r: 0.720 },
+      { name: '古登堡不连续面',     info: '约2900 km',   r: 0.480 },
+      { name: '莱曼不连续面',       info: '约5150 km',   r: 0.200 }
     ];
   } else {
+    // 化学组成分层：地表、莫霍洛维奇、古登堡、莱曼
     defs = [
-      { name: '地表',       info: '0 km',      r: 1.0 },
-      { name: '莫霍面',     info: '约 17 km',   r: 0.94 },
-      { name: '古登堡面',   info: '约 2900 km', r: 0.48 },
-      { name: '内外核分界', info: '约 5150 km', r: 0.20 }
+      { name: '地表',                     info: '0 km',        r: 1.00 },
+      { name: '莫霍洛维奇不连续面(莫霍面)', info: '约17 km',    r: 0.94 },
+      { name: '古登堡不连续面',           info: '约2900 km',   r: 0.48 },
+      { name: '莱曼不连续面',             info: '约5150 km',   r: 0.20 }
     ];
   }
-
   const startAngle = 15;
   const endAngle = 85;
   const step = (endAngle - startAngle) / (defs.length - 1);
-
   return defs.map((d, i) => ({
     ...d,
     angle: startAngle + step * i
   }));
 }
-
 /* ==================== 构建 3D 地球 ==================== */
 function buildGlobe(mode){
   // 清空旧的圈层
@@ -392,7 +371,6 @@ function buildGlobe(mode){
     item.mesh.material.dispose();
   });
   layerMeshes = [];
-
   // 清空旧的切面轮廓环
   ringMeshes.forEach(r => {
     scene.remove(r);
@@ -400,8 +378,7 @@ function buildGlobe(mode){
     r.material.dispose();
   });
   ringMeshes = [];
-
-  // 清空旧的标签 / 引线 / 圆点（labelObjects 里混有 DOM 元素、Line、Mesh）
+  // 清空旧的标签 / 引线 / 圆点
   labelObjects.forEach(obj => {
     if (obj.element && obj.element.parentNode) obj.element.parentNode.removeChild(obj.element);
     scene.remove(obj);
@@ -412,7 +389,6 @@ function buildGlobe(mode){
     }
   });
   labelObjects = [];
-
   // 清空旧的界面标注
   interfaceLines.forEach(obj => {
     if (obj.element && obj.element.parentNode) obj.element.parentNode.removeChild(obj.element);
@@ -424,9 +400,7 @@ function buildGlobe(mode){
     }
   });
   interfaceLines = [];
-
   const layers = MODES[mode].layers;
-
   layers.forEach(layer => {
     const rOuter = layer.rOuter * BASE_RADIUS;
     const geometry = new THREE.SphereGeometry(
@@ -434,7 +408,6 @@ function buildGlobe(mode){
       PHI_START, PHI_LENGTH,
       0, Math.PI
     );
-
     const color = new THREE.Color(layer.color);
     const material = new THREE.MeshStandardMaterial({
       color: color,
@@ -443,12 +416,10 @@ function buildGlobe(mode){
       emissive: color.clone().multiplyScalar(0.12),
       side: THREE.DoubleSide
     });
-
     const mesh = new THREE.Mesh(geometry, material);
     mesh.userData = { id: layer.id, layer: layer, baseColor: color.clone() };
     scene.add(mesh);
     layerMeshes.push({ id: layer.id, mesh: mesh, layer: layer });
-
     // 切面轮廓环
     const ringGeo = new THREE.TorusGeometry(rOuter, 0.006, 8, 80, PHI_LENGTH);
     const ringMat = new THREE.MeshBasicMaterial({
@@ -460,23 +431,18 @@ function buildGlobe(mode){
     scene.add(ring);
     ringMeshes.push(ring);
   });
-
   // 地心标签（外移 + 引线）
   addLabels(layers);
-
   // 关键界面标注（带引线）
   addInterfaceLabels(mode);
-
   updateHighlight();
 }
-
 /* ==================== 地心标签（带引线，放在球体外） ==================== */
 function addLabels(layers){
   const LABEL_RADIUS = BASE_RADIUS * 1.20;
-  const angle = (95 * Math.PI) / 180;   // 与界面标签错开角度
+  const angle = (95 * Math.PI) / 180;
   const xLb = Math.cos(angle) * LABEL_RADIUS;
   const yLb = Math.sin(angle) * LABEL_RADIUS;
-
   /* --- 引线：球心 → 标签 --- */
   const pts = [
     new THREE.Vector3(0, 0, 0),
@@ -494,7 +460,6 @@ function addLabels(layers){
   line.computeLineDistances();
   scene.add(line);
   labelObjects.push(line);
-
   /* --- 球心处的小圆点（保留，表示地心位置） --- */
   const dotGeo = new THREE.SphereGeometry(0.035, 12, 12);
   const dotMat = new THREE.MeshBasicMaterial({ color: 0xe8890c });
@@ -502,7 +467,6 @@ function addLabels(layers){
   dot.position.set(0, 0, 0);
   scene.add(dot);
   labelObjects.push(dot);
-
   /* --- 标签 --- */
   const centerDiv = document.createElement('div');
   centerDiv.className = 'label-3d label-3d-center';
@@ -516,21 +480,17 @@ function addLabels(layers){
   scene.add(centerLabel);
   labelObjects.push(centerLabel);
 }
-
 /* ==================== 关键界面标注（带引线） ==================== */
 function addInterfaceLabels(mode){
   const interfaces = getInterfaces(mode);
   const LABEL_RADIUS = BASE_RADIUS * 1.18;
-
   interfaces.forEach(iface => {
     const angle = (iface.angle * Math.PI) / 210;
     const rInterface = iface.r * BASE_RADIUS;
-
     const xIf = Math.cos(angle) * rInterface;
     const yIf = Math.sin(angle) * rInterface;
     const xLb = Math.cos(angle) * LABEL_RADIUS;
     const yLb = Math.sin(angle) * LABEL_RADIUS;
-
     /* --- 引线：球心 → 界面点 → 标签点 --- */
     const pts = [
       new THREE.Vector3(0, 0, 0),
@@ -549,7 +509,6 @@ function addInterfaceLabels(mode){
     line.computeLineDistances();
     scene.add(line);
     interfaceLines.push(line);
-
     /* --- 界面处的小圆点 --- */
     const dotGeo = new THREE.SphereGeometry(0.028, 10, 10);
     const dotMat = new THREE.MeshBasicMaterial({ color: 0x2f8fd6 });
@@ -557,7 +516,6 @@ function addInterfaceLabels(mode){
     dot.position.set(xIf, yIf, 0);
     scene.add(dot);
     interfaceLines.push(dot);
-
     /* --- 标签 --- */
     const div = document.createElement('div');
     div.className = 'label-3d label-3d-interface';
@@ -568,7 +526,6 @@ function addInterfaceLabels(mode){
     interfaceLines.push(label);
   });
 }
-
 /* ==================== 高亮 ==================== */
 function updateHighlight(){
   layerMeshes.forEach(item => {
@@ -584,17 +541,14 @@ function updateHighlight(){
     mat.needsUpdate = true;
   });
 }
-
 /* ==================== 点击拾取 ==================== */
 function onCanvasClick(event){
   const rect = renderer.domElement.getBoundingClientRect();
   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
   raycaster.setFromCamera(mouse, camera);
   const meshes = layerMeshes.map(item => item.mesh);
   const intersects = raycaster.intersectObjects(meshes, false);
-
   for (const hit of intersects) {
     if (hit.object.userData && hit.object.userData.id) {
       selectLayer(hit.object.userData.id);
@@ -602,7 +556,6 @@ function onCanvasClick(event){
     }
   }
 }
-
 /* ==================== 渲染循环 ==================== */
 function animate(){
   requestAnimationFrame(animate);
@@ -610,7 +563,6 @@ function animate(){
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
-
 /* ==================== 自适应 ==================== */
 function onResize(){
   const wrap = document.getElementById('canvas-wrap');
@@ -623,13 +575,11 @@ function onResize(){
   renderer.setSize(W, H);
   labelRenderer.setSize(W, H);
 }
-
 /* ==================== 右侧详情 ==================== */
 function renderInfo(){
   const layers = MODES[currentMode].layers;
   const layer = layers.find(l => l.id === currentId) || layers[0];
   const box = document.getElementById('info');
-
   box.innerHTML = `
     <div class="info-head" style="--c:${layer.color}">
       <span class="swatch"></span>
@@ -649,40 +599,33 @@ function renderInfo(){
     </ul>
   `;
 }
-
 /* ==================== 选择圈层 ==================== */
 function selectLayer(id){
   currentId = id;
   updateHighlight();
   renderInfo();
 }
-
 /* ==================== 切换模式 ==================== */
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.dataset.mode === currentMode) return;
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     currentMode = btn.dataset.mode;
     currentId = MODES[currentMode].layers[0].id;
-
     document.getElementById('modeDesc').textContent = MODES[currentMode].desc;
     buildGlobe(currentMode);
     renderInfo();
   });
 });
-
 /* ==================== 启动 ==================== */
 document.getElementById('modeDesc').textContent = MODES[currentMode].desc;
-
 window.addEventListener('load', () => {
   initThree();
   buildGlobe(currentMode);
   renderInfo();
   setTimeout(onResize, 120);
 });
-
 window.addEventListener('resize', onResize);
 </script>
 </body>
