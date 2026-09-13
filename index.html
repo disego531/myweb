@@ -291,7 +291,7 @@
         <span>📂 当前页面 URL:</span>
         <code id="currentUrlDisplay">计算中...</code>
         <span>⬇️ 尝试加载</span>
-        <code id="listPathDisplay">./heat_maps/list.md</code>
+        <code id="listPathDisplay">./list.md</code>
     </div>
 
     <!-- 计数 + 标题 -->
@@ -308,7 +308,7 @@
         <div class="empty-state" id="loadingPlaceholder">
             <div style="display: flex; gap: 0.8rem; align-items: center; justify-content: center;">
                 <span class="loading-spinner"></span>
-                正在尝试加载 <code>heat_maps/list.md</code> ...
+                正在尝试加载 <code>list.md</code> ...
             </div>
         </div>
     </div>
@@ -369,13 +369,13 @@
             
             // 方法1: 基于当前目录的相对路径（最常用）
             paths.push({
-                url: './heat_maps/list.md',
-                description: '相对路径 (./heat_maps/list.md)'
+                url: './list.md',
+                description: '相对路径 (./list.md)'
             });
             
             // 方法2: 基于baseDir的绝对路径
             if (pathInfo.baseDir) {
-                const absolutePath = pathInfo.baseDir + 'heat_maps/list.md';
+                const absolutePath = pathInfo.baseDir + 'list.md';
                 paths.push({
                     url: absolutePath,
                     description: '基于当前目录的绝对路径'
@@ -384,14 +384,14 @@
             
             // 方法3: 根目录相对路径
             paths.push({
-                url: '/heat_maps/list.md',
+                url: '/list.md',
                 description: '网站根目录相对路径'
             });
             
             // 方法4: 尝试去掉可能的多级目录
             if (pathInfo.pathname.split('/').length > 2) {
                 paths.push({
-                    url: '../heat_maps/list.md',
+                    url: '../list.md',
                     description: '上级目录相对路径'
                 });
             }
@@ -523,7 +523,7 @@
             } else if (cleanPath.includes('heat_maps/')) {
                 return baseDir + cleanPath;
             } else {
-                return baseDir + 'heat_maps/' + cleanPath;
+                return baseDir +  cleanPath;
             }
         }
 
@@ -599,7 +599,7 @@
                         if (m === '>') return '&gt;';
                         return m;
                     })}<br>
-                    <span style="font-size:0.95rem;">请确认 <code>heat_maps/list.md</code> 文件存在且可读。</span>
+                    <span style="font-size:0.95rem;">请确认 <code>list.md</code> 文件存在且可读。</span>
                 </div>
             `;
             countDisplay.textContent = '错误';
@@ -646,7 +646,7 @@
 <noscript>
     <div style="background:#f3dddd; padding:2rem; border-radius:2rem; text-align:center; margin:2rem 0;">
         ⚠️ 您的浏览器未启用 JavaScript，无法加载动态内容。<br>
-        请直接查看 <code>./heat_maps/list.md</code> 文件。
+        请直接查看 <code>./list.md</code> 文件。
     </div>
 </noscript>
 </body>
